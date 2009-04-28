@@ -1,0 +1,55 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workbench ActiveDocument="loki/Main.cs" ctype="Workbench">
+    <Files>
+      <File FileName="loki/MasterWin.cs" Line="325" Column="38" />
+      <File FileName="loki/Client.cs" Line="288" Column="10" />
+      <File FileName="loki/Main.cs" Line="28" Column="38" />
+      <File FileName="loki/GruntWin.cs" Line="2" Column="16" />
+      <File FileName="loki/RoleDialog.cs" Line="25" Column="2" />
+      <File FileName="loki/AddJobWin.cs" Line="3" Column="3" />
+      <File FileName="loki/Queue.cs" Line="439" Column="29" />
+      <File FileName="loki/app.desktop" />
+      <File FileName="loki/AssemblyInfo.cs" Line="8" Column="55" />
+      <File FileName="loki/CSocket.cs" Line="2" Column="16" />
+      <File FileName="loki/Job.cs" Line="2" Column="16" />
+      <File FileName="loki/Listener.cs" Line="2" Column="16" />
+      <File FileName="loki/Notice.cs" Line="15" Column="50" />
+      <File FileName="loki/RemoteClient.cs" Line="275" Column="28" />
+      <File FileName="loki/SanityFailureException.cs" Line="22" Column="1" />
+      <File FileName="loki/TaskTypeCatalog.cs" Line="144" Column="54" />
+      <File FileName="lokiTest/Suite1.cs" Line="15" Column="1" />
+      <File FileName="lokiTest/Main.cs" Line="9" Column="4" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="loki" expanded="True" selected="True">
+            <Node name="References" expanded="True" />
+          </Node>
+          <Node name="lokiTest" expanded="True" />
+        </State>
+      </Pad>
+      <Pad Id="ClassPad">
+        <State expanded="True" selected="True" />
+      </Pad>
+      <Pad Id="MonoDevelop.NUnit.TestPad">
+        <State expanded="True">
+          <Node name="lokiTest" expanded="True">
+            <Node name="loki" expanded="True">
+              <Node name="Job_Test" expanded="True">
+                <Node name="dummyTest" selected="True" />
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State />
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" ctype="Workspace" />
+</Properties>
