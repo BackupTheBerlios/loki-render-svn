@@ -39,6 +39,7 @@ namespace loki
 		public RoleDialog()
 		{
 			this.Build();
+			role = -1;
 		}
 	}
 }

@@ -64,7 +64,9 @@ namespace loki
 			role = roleDialog.role;
 			roleDialog.Destroy();
 			
-			if(role == 0) //launch a grunt
+			if(role == -1)	//the windows was closed, exit.
+				Application.Quit();
+			else if(role == 0) //launch a grunt
 			{	
 				gWin = new GruntWin(true);
 				rC = new RemoteClient(broadcastPort, connectPort, bufferSize, false, gWin, true);
@@ -101,7 +103,8 @@ namespace loki
 				throw new SanityFailureException("received an unknown role from RoleDialog!");
 			}
 			
-			Application.Run ();	//tally-ho!
+			if(role != -1) //make sure we haven't exited.
+				Application.Run ();	//tally-ho!
 			
 		}//end normalLokiStart()
 		
