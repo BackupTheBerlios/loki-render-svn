@@ -23,11 +23,15 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace loki
 {
+	[Serializable]
     public class Job
     {
+		[Serializable]
         public struct FrameStatus
         {
             public int frame, clientID, failures;
@@ -35,11 +39,9 @@ namespace loki
             //'finished', or 'requested'; where 'aborted' means (failed >= failureAllowance)
         }
 
-        static int jobIDCounter = 0;
-        
         /// <summary>
         /// a - remaining, stopped
-        /// b - remining, tasks running
+        /// b - remaining, tasks running
         /// c - all assigned, running
         /// d - all tasks finished or aborted
         /// </summary>
@@ -55,7 +57,7 @@ namespace loki
         //constructor
         public Job(string iName, string tType, string winEPath, string winFPath, string winOPath,
             string unixEPath, string unixFPath, string unixOPath, int iFirstFrame, int iLastFrame,
-            int iFailureAllowance)
+            int iFailureAllowance, int jID)
         {
             name = iName;
 			taskType = tType;
@@ -71,7 +73,7 @@ namespace loki
             failureAllowance = iFailureAllowance;
             frames = new FrameStatus[totalFrames];
 
-            jobID = jobIDCounter++;
+            jobID = jID;
             status = 'a'; // can later be set to 'b', 'c', 'd'
 
             //initialize framesStatus

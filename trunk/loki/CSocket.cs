@@ -130,7 +130,7 @@ namespace loki
         {
             byte[] msgSize = new Byte[1];
             receiveBuffer = new Byte[bufferSize];
-			Debug.WriteLine("cSock: entering readStream...");
+			//Debug.WriteLine("cSock: entering readStream...");
 			bool lost = false;
             try
             {
@@ -170,7 +170,7 @@ namespace loki
 				close();
 				lost = true;
             }
-			Debug.WriteLine("cSock: done w/ readStream");
+			//Debug.WriteLine("cSock: done w/ readStream");
 			
 			if(lost)
 				return "lost";
@@ -185,7 +185,7 @@ namespace loki
         /// <returns>true if send succeeded, false if failed</returns>
         public bool writeStream(string sMsg)
         {
-			Debug.WriteLine("cSock: entering writeStream...");
+			//Debug.WriteLine("cSock: entering writeStream...");
             byte[] msgSize = new Byte[1];
             msgSize[0] = (byte)sMsg.Length;
             sendBuffer = new Byte[bufferSize];
@@ -205,7 +205,7 @@ namespace loki
                 Console.WriteLine("SocketException: {0}", ex);
             }
             
-			Debug.WriteLine("cSock: done w/ writeStream");
+			//Debug.WriteLine("cSock: done w/ writeStream");
             return true;    
         }
 

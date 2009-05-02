@@ -143,7 +143,7 @@ namespace loki {
             this.lblTotalCores = new Gtk.Label();
             this.lblTotalCores.Name = "lblTotalCores";
             this.lblTotalCores.Xalign = 0F;
-            this.lblTotalCores.LabelProp = "15";
+            this.lblTotalCores.LabelProp = "0";
             this.hbox3.Add(this.lblTotalCores);
             Gtk.Box.BoxChild w4 = ((Gtk.Box.BoxChild)(this.hbox3[this.lblTotalCores]));
             w4.Position = 1;

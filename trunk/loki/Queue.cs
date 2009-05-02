@@ -20,8 +20,12 @@
 //
 
 using System;
+using System.IO;					//for writing/reading jobs to/from file
 using System.Collections.Generic;
 using System.Threading;
+using System.Runtime.Serialization;	//for writing/reading jobs to/from file
+using System.Runtime.Serialization.Formatters.Binary;	//for writing/reading jobs to/from file
+using System.Diagnostics;	//for debug output
 
 namespace loki
 {
@@ -70,6 +74,8 @@ namespace loki
 			//listener and broadcast threads are launched in constructor!
             myListener = new Listener(this, port, broadcastInterval, timeout, this.win);
 
+			loadJobsFromCfg();	//load the last session's jobs into the queue
+			
             qThread = new Thread(queueManagerThread);   //td - error checking for thread stuff?
             qThread.Start();
         }
@@ -94,10 +100,71 @@ namespace loki
 			
 			//listener and broadcast threads are launched in constructor!
             myListener = new Listener(this, port, broadcastInterval, timeout, this.win, rC);
+			
+			loadJobsFromCfg();	//load the last session's jobs into the queue
 
             qThread = new Thread(queueManagerThread);   //td - error checking for thread stuff?
             qThread.Start();
         }
+		
+		int findNextFreeJobID()
+		{
+			int id = -1;
+			bool free;
+			
+			do
+			{
+				id++;
+				free = true;
+				foreach(Job j in jobs)
+				{
+					if(j.jobID == id)	//is this id already taken?
+					{
+						free = false;	
+						break;
+					}
+				}
+			}while(!free);
+			
+			return id;
+		}
+		
+		//pulls the last session's jobs from the lokiRender.cfg file and adds them to the queue.
+		bool loadJobsFromCfg()
+		{
+			if(File.Exists("lokiRender.cfg"))
+			{
+				IFormatter formatter = new BinaryFormatter();
+				Stream stream = new FileStream("lokiRender.cfg", FileMode.Open, FileAccess.Read, FileShare.Read);
+				try
+				{
+					jobs = (List<Job>) formatter.Deserialize(stream);
+					
+					foreach(Job j in jobs)
+					{
+						for(int f = 0; f<j.frames.Length; f++)
+						{
+							if(j.frames[f].status == "running" || j.frames[f].status == "requested")
+								j.frames[f].status = "unassigned";
+						}
+						j.updateMyStatus();
+						addJobToGUI(j.jobID);
+					}
+					updateProgressBarToGUI();
+				}
+				catch(Exception ex)
+				{
+					Debug.WriteLine("qMT: exception while trying to load jobs: " + ex.Message);
+					return false;
+				}
+				finally
+				{
+					stream.Dispose();
+					stream.Close();	
+				}
+			}
+			return true;
+		}
 		
 		public bool getQRunning()
 		{
@@ -189,7 +256,23 @@ namespace loki
                             c.deliverNotice(new Notice("shutdown"));
                         }
                     }
-                    //TODO - save config info to file before exit
+					
+					//let's write our jobs to the lokiRender.cfg file so we can read them next startup
+					IFormatter formatter = new BinaryFormatter();
+					Stream stream = new FileStream("lokiRender.cfg", FileMode.Create, FileAccess.Write, FileShare.None);
+					try
+					{
+						formatter.Serialize(stream, jobs);	
+					}
+					catch(SerializationException ex)
+					{
+						Debug.WriteLine("qMT: failed to write Jobs to lokiRender.cfg: " + ex.Message);
+					}
+					finally
+					{
+						stream.Dispose();
+						stream.Close();
+					}
                 }
                 else if (n.noticeType == "add")
                 {
@@ -207,7 +290,7 @@ namespace loki
                     {
 						jobs.Add(new Job(n.jobName, n.taskType, n.winExePath, n.winFilePath, n.winOutputPath,
 						                 n.unixExePath, n.unixFilePath, n.unixOutputPath, n.firstFrame,
-						                 n.lastFrame, n.failureAllowance));
+						                 n.lastFrame, n.failureAllowance, findNextFreeJobID()));
 						
 						addJobToGUI(jobs[findJobIndex(n.jobName)].jobID);
 						updateProgressBarToGUI();
@@ -268,6 +351,7 @@ namespace loki
 		
 		bool addJobToGUI(int jobID)
 		{
+			Debug.WriteLine("qMT: adding job to queue w/ jobID: " + jobID);
 			Job j = jobs[findJobIndex(jobID)];
 				
 			bool result = true;
