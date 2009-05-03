@@ -1,5 +1,5 @@
 // Project: Loki Render - A distributed job queue manager.
-// Version: 0.5
+// Version: 0.5.1
 // 
 // File Description: abstracts socket use, checks for errors, and provides
 // some other useful functions for the socket, like 'checkIfConnected..'

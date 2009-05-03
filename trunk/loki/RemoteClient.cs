@@ -1,5 +1,5 @@
 // Project: Loki Render - A distributed job queue manager.
-// Version: 0.5
+// Version: 0.5.1
 // 
 // File Description: 'Grunt' program for the remote client	  
 // 
@@ -38,6 +38,7 @@ namespace loki
         int bufferSize;
         IPAddress destAddr;
 		bool shutdown;
+		bool gui;	//if true, then we're running the gui; if false, grunt is on command line
 		public bool busy;
 		GruntWin gWin;
 		AutoResetEvent localShutdownEvent;
@@ -45,8 +46,10 @@ namespace loki
 		public Object busyLock;
 		bool solo;	//if true, then I'm NOT running with a master on this computer!
 
+		//default constructor for normal gui grunt
         public RemoteClient(int bPort, int cPort, int bSize, bool background, GruntWin g, bool solo)
         {
+			gui = true;
 			this.solo = solo;	//if true, then I'm NOT running with a master on this machine!
 			shutdown = false;
 			busy = false;
@@ -63,6 +66,31 @@ namespace loki
 				rThread.IsBackground = true;
             rThread.Start();
         }
+		
+		//constructor for grunt on command line
+        public RemoteClient(int bPort, int cPort, int bSize, bool background, bool solo)
+        {
+			gui = false;
+			this.solo = solo;	//if true, then I'm NOT running with a master on this machine!
+			shutdown = false;
+			busy = false;
+			broadcastPort = bPort;
+            connectPort = cPort;  
+            bufferSize = bSize;
+			localShutdownEvent = new AutoResetEvent(false);
+			ok2ConnectMaster = new AutoResetEvent(false);
+			busyLock = new Object();
+			
+            rThread = new Thread(rClientThread);
+			if(background)
+				rThread.IsBackground = true;
+            rThread.Start();
+        }
+		
+		public void wait4rThreadExit()
+		{
+			rThread.Join();
+		}
 		
 		public void setMasterOk()
 		{
@@ -145,6 +173,9 @@ namespace loki
 		//returns true if everything went ok, false if we got a shutdown
         public bool discoverMaster()
         {
+			if(!gui)
+				Console.WriteLine("Searching for master...");
+			
 			IPEndPoint iep;
             EndPoint ep;
 			Socket uSock;
@@ -219,8 +250,6 @@ namespace loki
 
         public string prepareInitialNotice()
         {
-            //TODO - need to make sure these work on linux and mac, as well as windows
-            
 			if(System.Environment.MachineName != null)
 				machineName = System.Environment.MachineName;
 			else
@@ -246,7 +275,9 @@ namespace loki
 			
             while (!shutdown)
 			{
-				gWin.invokeBlank();	//blank the progress bar
+				if(gui)
+					gWin.invokeBlank();	//blank the progress bar
+				
 				if (!discoverMaster())
                 {
 					shutdown = true;//quit - nothing to do if we can't bind to listen for master
@@ -263,7 +294,12 @@ namespace loki
                     else    //we're connected to the master, so continue:-)
                     {	
 						connected = true;
-                        gWin.invokeSetLblConnection("online with master at '" + destAddr.ToString() + "'.");
+						
+						if(gui)
+                        	gWin.invokeSetLblConnection("online with master at '" + destAddr.ToString() + "'.");
+						else	//gruntcl
+							Console.WriteLine("Online with master at '" + destAddr.ToString() + "'.");
+						
                         //send our initial node info
                         if (!sock.writeStream(prepareInitialNotice()))
                         {
@@ -272,8 +308,11 @@ namespace loki
                         }
 						Debug.WriteLine("rC: just sent initial notice");
 
+						if(!gui)
+							Console.WriteLine("idle");
+						
                         do //connected && !shutdown
-                        {
+                        {	
 							if(sock.check4Message() > 0)
                             {
 	                            receiveMsg = sock.readStream(); //we should receive a 'taskToRun' here
@@ -306,7 +345,10 @@ namespace loki
 							}
 						        
 					    }while(connected && !shutdown);
-                        gWin.invokeSetLblConnection("lost connection! Trying to reconnect...");
+						if(gui)
+                        	gWin.invokeSetLblConnection("lost connection! Searching for master...");
+						else
+							Console.WriteLine("Lost connection!");
                     }
 				    sock.close();
                 }
@@ -342,7 +384,10 @@ namespace loki
 				{
 				    busy = true;
 			    }
-                gWin.invokeSetLblStatus("busy"); 
+				if(gui)
+                	gWin.invokeSetLblStatus("busy");
+				else
+					System.Console.WriteLine("busy...");
           
 				//identify platform here
 				if(System.Environment.OSVersion.Platform == PlatformID.Unix)
@@ -399,7 +444,8 @@ namespace loki
 							Debug.WriteLine("rC: sent update running");
 		                    do//stay in this loop until: a) task finishes, b) receive local shutdown, c) remoteShutdown  
 							{
-								gWin.invokePulse();
+								if(gui)
+									gWin.invokePulse();
 								taskFinished = taskProcess.WaitForExit(0);//check if task has finished
 								if(!taskFinished)
 	                            {
@@ -524,9 +570,15 @@ namespace loki
 				lock(busyLock)
 			    {
 		            busy = false;
-				} 
-	            gWin.invokeSetLblStatus("idle");
-				gWin.invokeBlank();
+				}
+				if(gui)
+				{
+		            gWin.invokeSetLblStatus("idle");
+					gWin.invokeBlank();
+				}
+				else
+					System.Console.WriteLine("idle");
+				
 			}//end if(t[0] = "task")
 			else if (t[0] == "disconnect")    //master is shutting down, so disconnect
 	        {
@@ -545,14 +597,6 @@ namespace loki
 	            throw new SanityFailureException("client sent us an unkown task!: " + t[0]);
 	        }	
         	return connected;
-		}
-		
-	    //td - test	
-	    public static bool randomBool()
-		{
-	            Random randomSeed = new Random();
-	
-				return (randomSeed.NextDouble() > 0.5);
 		}
     }
 }

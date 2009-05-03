@@ -1,5 +1,5 @@
 // Project: Loki Render - A distributed job queue manager.
-// Version: 0.5
+// Version: 0.5.1
 // 
 // File Description: two parts: listener accepts new remote client connections
 // and creates a new client object in the clients list. broadcaster sends out

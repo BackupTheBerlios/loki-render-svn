@@ -1,5 +1,5 @@
 // Project: Loki Render - A distributed job queue manager.
-// Version: 0.5
+// Version: 0.5.1
 // 
 // File Description: holds all info related to a job, including it's progress
 // and all functions needed to interact with the job

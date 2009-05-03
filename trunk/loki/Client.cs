@@ -1,5 +1,5 @@
 // Project: Loki Render - A distributed job queue manager.
-// Version: 0.5
+// Version: 0.5.1
 //
 // File Description: Acts as liason between the Master thread and the remote client.
 // An instance is created for each remote client that connects, and is destroyed when

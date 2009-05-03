@@ -1,5 +1,5 @@
 // Project: Loki Render - A distributed job queue manager.
-// Version: 0.5
+// Version: 0.5.1
 //
 // File Description: queries user about role, then starts up appropriate
 // parts of Loki. 
@@ -38,9 +38,12 @@ namespace loki
 		static int broadcastPort, connectPort, bufferSize, broadcastInterval, clientShutdownWait;
 		static Queue q;
 		static RemoteClient rC;
+		static string startupType;
 		
 		public static void Main (string[] args)
 		{	
+			startupType = handleArgs(args);
+			
 			//setup debug
 			Debug.Listeners.Add(new TextWriterTraceListener(Console.Out));
 			Debug.AutoFlush = true;
@@ -53,24 +56,59 @@ namespace loki
 			broadcastInterval = 1;
 			clientShutdownWait = 1;
 			
-			normalLokiStart();//call will not return from here till GTK quits!
+			if(startupType != "quit")
+				normalLokiStart();//call will not return from here till GTK quits!
+		}
+		
+		//returns 'quit', 'noguigrunt' or 'noargs'
+		static string handleArgs(string[] args)
+		{
+			string result = "quit";
+			
+			if(args.Length == 1)
+			{
+				if(args[0] == "gruntcl")
+					result = args[0];
+			}
+			else if(args.Length < 1)
+				result = "noargs";
+			
+			if(result == "quit")
+				Console.WriteLine("Usage: loki_<version>.exe [gruntcl]");
+			
+			return result;
 		}
 		
 		static void normalLokiStart()
 		{
-			Application.Init ();
-			roleDialog = new RoleDialog();
-			roleDialog.Run();
-			role = roleDialog.role;
-			roleDialog.Destroy();
+			if(startupType == "noargs")	//normal gui select role, startup stuff
+			{
+				Application.Init ();
+				roleDialog = new RoleDialog();
+				roleDialog.Run();
+				role = roleDialog.role;
+				roleDialog.Destroy();
+			}
+			else if(startupType == "gruntcl")
+			{
+				Console.WriteLine("Running Loki grunt in command line mode. Press the Escape (Esc) key to quit.");
+				role = 0;
+			}
+			else
+				throw new SanityFailureException("oops, we have an unknown startupType in main!");
 			
-			if(role == -1)	//the windows was closed, exit.
+			if(role == -1)	//the window was closed, exit.
 				Application.Quit();
 			else if(role == 0) //launch a grunt
 			{	
-				gWin = new GruntWin(true);
-				rC = new RemoteClient(broadcastPort, connectPort, bufferSize, false, gWin, true);
-				gWin.setRCHandle(rC);
+				if(startupType == "noargs") //normal gui startup
+				{
+					gWin = new GruntWin(true);
+					rC = new RemoteClient(broadcastPort, connectPort, bufferSize, false, gWin, true);
+					gWin.setRCHandle(rC);
+				}
+				else	//grunt on command line
+					rC = new RemoteClient(broadcastPort, connectPort, bufferSize, false, true);
 			}
 			else if(role == 1) //launch the master
 			{
@@ -103,12 +141,25 @@ namespace loki
 				throw new SanityFailureException("received an unknown role from RoleDialog!");
 			}
 			
-			if(role != -1) //make sure we haven't exited.
+			if(role != -1 && startupType == "noargs") //make sure we haven't exited, and that we're running gui
 				Application.Run ();	//tally-ho!
+			
+			if(startupType == "gruntcl")
+			{
+				ConsoleKeyInfo cki;
+				do
+				{
+					cki = Console.ReadKey(true);	
+				}while(cki.Key != ConsoleKey.Escape);
+				
+				rC.signalShutdown();
+				rC.wait4rThreadExit();
+				Console.WriteLine("Loki grunt quitting.");
+			}
 			
 		}//end normalLokiStart()
 		
-		//test quick way to inject jobs into the queue for testing purposes
+		//TEST - quick way to inject jobs into the queue for testing purposes
 		static void test()
 		{
 			int howManyJobs = 0;

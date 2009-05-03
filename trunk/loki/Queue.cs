@@ -1,5 +1,5 @@
 // Project: Loki Render - A distributed job queue manager.
-// Version: 0.5
+// Version: 0.5.1
 // 
 // File Description: This is the center of the master's queue management	  
 // 
@@ -107,7 +107,7 @@ namespace loki
             qThread.Start();
         }
 		
-		int findNextFreeJobID()
+		int findFirstFreeJobID()
 		{
 			int id = -1;
 			bool free;
@@ -220,6 +220,8 @@ namespace loki
             while (!shutdown)
             {
                 n = fetchOrWait4Notice();    //will take next Notice from queue, or wait for next if empty
+				Debug.WriteLine("qMT: received notice: " + n.noticeType);
+				
                 if (n.noticeType == "update")
                 {
                     if (!handleUpdate(n))  //note: handleUpdate() calls manageJobs() if there are any status changes
@@ -290,7 +292,7 @@ namespace loki
                     {
 						jobs.Add(new Job(n.jobName, n.taskType, n.winExePath, n.winFilePath, n.winOutputPath,
 						                 n.unixExePath, n.unixFilePath, n.unixOutputPath, n.firstFrame,
-						                 n.lastFrame, n.failureAllowance, findNextFreeJobID()));
+						                 n.lastFrame, n.failureAllowance, findFirstFreeJobID()));
 						
 						addJobToGUI(jobs[findJobIndex(n.jobName)].jobID);
 						updateProgressBarToGUI();
