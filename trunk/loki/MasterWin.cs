@@ -116,7 +116,7 @@ namespace loki
 		public void invokeAddGruntToTV(int clientID, string name, string status, string os, string cores)
 		{
 			Application.Invoke (delegate {
-				gruntList.AppendValues(clientID, name, os, cores, "ready");
+				gruntList.AppendValues(clientID, name, os, cores, "", "ready");
 				totalCores += Convert.ToInt32(cores, 10);
 				lblTotalCores.Text = totalCores.ToString();
 			});
@@ -149,6 +149,36 @@ namespace loki
 			});
 		}
 		
+		//for updating status and taskTime
+		public void invokeUpdateGruntTV(int clientID, string status, string taskTime)
+		{
+			Application.Invoke (delegate
+			{
+				int result = -1;
+				int r = 0;//store the row we find
+				foreach(object[] row in gruntList)
+				{
+					if(clientID == (int) row[0])
+					{
+						result = r;
+						break;
+					}
+				    r++;
+				}
+				if(result != -1)
+				{
+					TreeIter myIter = new TreeIter();
+					TreePath tPath = new TreePath(r.ToString());
+					gruntList.GetIter(out myIter, tPath);
+					
+					gruntList.SetValue(myIter, 4, taskTime);
+					gruntList.SetValue(myIter, 5, status);
+					//jobList.EmitRowChanged(tPath, myIter);
+				}
+			});		
+		}
+		
+		//for updating the status
 		public void invokeUpdateGruntTV(int clientID, string status)
 		{  
 			Application.Invoke (delegate
@@ -169,8 +199,8 @@ namespace loki
 					TreeIter myIter = new TreeIter();
 					TreePath tPath = new TreePath(r.ToString());
 					gruntList.GetIter(out myIter, tPath);
-					gruntList.SetValue(myIter, 4, status);
-					jobList.EmitRowChanged(tPath, myIter);
+					gruntList.SetValue(myIter, 5, status);
+					//jobList.EmitRowChanged(tPath, myIter);
 				}
 			});
 		}
@@ -180,8 +210,10 @@ namespace loki
 			gruntsView.AppendColumn("Name", new CellRendererText(), "text", 1);
 			gruntsView.AppendColumn("OS", new CellRendererText(), "text", 2);
 			gruntsView.AppendColumn("Cores", new CellRendererText(), "text", 3);
-			gruntsView.AppendColumn("Status", new CellRendererText(), "text", 4);
-			gruntList = new Gtk.ListStore(typeof(int), typeof(string), typeof(string), typeof(string), typeof(string));
+			gruntsView.AppendColumn("LastTaskTime", new CellRendererText(), "text", 4);
+			gruntsView.AppendColumn("Status", new CellRendererText(), "text", 5);
+			gruntList = new Gtk.ListStore(typeof(int), typeof(string), typeof(string), typeof(string),
+			                              typeof(string), typeof(String));
 			gruntsView.Model = gruntList;
 		}
 			
@@ -324,7 +356,8 @@ namespace loki
 				string m = "'" + cName + "' failed with the following error message: " + Environment.NewLine +
 				           Environment.NewLine + "\"" + eMsg + "\".\r\n\r\nUnfortunately, all " + tries
 						   + " attempts to run this task have failed, so the queue has been stopped." +
-						   " Please resolve the problem and then start the job queue again.";
+						   " Please resolve the problem and then start the job queue again." +
+							" For more detailed info, check stdout on " + cName + ".";
 				
 				showModalMsg("warning", m);
 			});

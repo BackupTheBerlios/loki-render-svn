@@ -203,7 +203,10 @@ namespace loki
 				return true;	
 			}
 			else
+			{
+				Console.WriteLine(stdout);
 				return false;
+			}
 		}
 	}
 }

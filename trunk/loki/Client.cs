@@ -40,6 +40,7 @@ namespace loki
         public Object noticeLock;
         Thread cThread;
 		int timeout;//the amount of time(ms) client will wait for shutdown signal before continuing loop
+		DateTime startTime;	//use these to time how long the task has been running
 
         public Client(Queue q, CSocket mSock, int t)
         {
@@ -55,6 +56,15 @@ namespace loki
             cThread = new Thread(clientThread);
             cThread.Start();
         }
+		
+		public string getRunningTaskTime()
+		{
+			DateTime now = DateTime.UtcNow;
+			double runningTime = (DateTime.UtcNow - startTime).TotalSeconds;
+			TimeSpan t = TimeSpan.FromSeconds(runningTime);
+			//return t.Hours + ":" + t.Minutes + ":" + t.Seconds + "." + String.Format("{0:F0}", (t.Milliseconds/10));
+			return String.Format("{0:D2}:{1:D2}:{2:D2}.{3:D2}", t.Hours, t.Minutes, t.Seconds, t.Milliseconds/10);
+		}
 
 		/// <summary>
 		/// fetches initial notice info from the remote client right after it's connected,
@@ -265,6 +275,7 @@ namespace loki
 									//receiveMsg examples: "update*running", "update*failed*exe*blender"
 									if (tokens[1] == "running")
                                     {
+										startTime = DateTime.UtcNow;
                                         newN.clientMsg = "running";    //we'll get another update for this task,
                                                                     //so stay in 'waiting' loop
                                     }

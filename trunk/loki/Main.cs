@@ -133,8 +133,8 @@ namespace loki
 				masterWin.setQHandle(q);
 				
 				//TEST
-				//Thread tThread = new Thread(test);
-				//tThread.Start();
+				Thread tThread = new Thread(test);
+				tThread.Start();
 			}
 			else if(role < 0 || role > 2)
 			{
@@ -185,7 +185,7 @@ namespace loki
 			for(int c = 0; c<howManyClients; c++)
 			{
 				rC = new RemoteClient(broadcastPort, connectPort, bufferSize, true, gWin, false);
-		    }	
+		    }
 		}
 	}
 }//end namespace loki

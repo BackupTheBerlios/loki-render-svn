@@ -6,7 +6,7 @@
   </configuration>
   <import>
     <widget-library name="glade-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
-    <widget-library name="../bin/Release/loki.exe" internal="true" />
+    <widget-library name="../bin/Debug/loki.exe" internal="true" />
   </import>
   <widget class="Gtk.Window" id="loki.MasterWin" design-size="736 485">
     <action-group name="Default">
@@ -477,7 +477,6 @@
                             <property name="Tooltip" translatable="yes">A worker in the farm. Runs tasks from the job queue.</property>
                             <property name="CanFocus">True</property>
                             <property name="Label" translatable="yes">Grunt</property>
-                            <property name="Active">True</property>
                             <property name="DrawIndicator">True</property>
                             <property name="HasLabel">True</property>
                             <property name="UseUnderline">True</property>

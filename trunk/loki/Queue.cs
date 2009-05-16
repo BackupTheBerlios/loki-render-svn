@@ -576,11 +576,15 @@ namespace loki
             }
             else if (n.clientMsg == "done")
             {
+				string taskTime;
                 lock (clientsLock)
                 {
-                    clients[findClientIndex(n.clientID)].status = "available";
+					int clientIndex = findClientIndex(n.clientID);
+                    clients[clientIndex].status = "available";
+					taskTime = clients[clientIndex].getRunningTaskTime();
                 } 
-				win.invokeUpdateGruntTV(n.clientID, "ready");
+				win.invokeUpdateGruntTV(n.clientID, "ready", taskTime);
+				Console.WriteLine("taskTime: " + taskTime + " seconds.");
 				
                 jobs[jIndex].frames[n.frameIndex].status = "finished";
                 jobs[jIndex].updateMyStatus();
