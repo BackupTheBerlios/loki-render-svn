@@ -136,7 +136,6 @@ namespace loki {
             // Container child dialog1_ActionArea.Gtk.ButtonBox+ButtonBoxChild
             this.buttonOk = new Gtk.Button();
             this.buttonOk.CanDefault = true;
-            this.buttonOk.CanFocus = true;
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.UseStock = true;
             this.buttonOk.UseUnderline = true;

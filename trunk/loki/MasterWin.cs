@@ -210,7 +210,7 @@ namespace loki
 			gruntsView.AppendColumn("Name", new CellRendererText(), "text", 1);
 			gruntsView.AppendColumn("OS", new CellRendererText(), "text", 2);
 			gruntsView.AppendColumn("Cores", new CellRendererText(), "text", 3);
-			gruntsView.AppendColumn("LastTaskTime", new CellRendererText(), "text", 4);
+			gruntsView.AppendColumn("Last Task", new CellRendererText(), "text", 4);
 			gruntsView.AppendColumn("Status", new CellRendererText(), "text", 5);
 			gruntList = new Gtk.ListStore(typeof(int), typeof(string), typeof(string), typeof(string),
 			                              typeof(string), typeof(String));
