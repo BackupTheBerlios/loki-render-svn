@@ -33,6 +33,10 @@ namespace loki
 		int totalCores;
 		static string lastSelectedJobName;
 		
+		//jobsView context menu stuff
+		Menu jMenu;
+		MenuItem addJob, editJob, removeJob, removeFinishedJobs;
+		
 		public MasterWin (int r): base (Gtk.WindowType.Toplevel)
 		{
 			Build ();
@@ -41,6 +45,24 @@ namespace loki
 			jobsView.Selection.Changed += OnJobsSelectionChanged;
 			lastSelectedJobName = null;
 			totalCores = 0;
+			
+			//jobsView context menu initialization
+			jMenu = new Menu();
+			addJob = new MenuItem("new job");
+			editJob = new MenuItem("edit job");
+			removeJob = new MenuItem("remove job");
+			removeFinishedJobs = new MenuItem("remove finished jobs");
+			
+			addJob.Show();
+			removeFinishedJobs.Show();
+			
+			jMenu.Append (addJob);
+			jMenu.Append (editJob);
+			jMenu.Append (removeJob);
+			jMenu.Append (removeFinishedJobs);
+			
+			addJob.Activated += new EventHandler(OnAddActionActivated);
+			removeFinishedJobs.Activated += new EventHandler(OnRemoveAllFinishedActionActivated);
 		}
 		
 		public void setQHandle(Queue q)
@@ -50,13 +72,15 @@ namespace loki
 		
 		static void OnJobsSelectionChanged (object o, EventArgs args)
 	    {
-	        TreeIter iter;
-	        TreeModel model;
-	
-	        if (((TreeSelection)o).GetSelected (out model, out iter))
-	        {
-				lastSelectedJobName = (string) model.GetValue (iter, 1);
-	        }
+			TreeIter iter;
+            TreeModel model;
+
+            if (((TreeSelection)o).GetSelected (out model, out iter))
+            {
+            	lastSelectedJobName = (string) model.GetValue (iter, 1);
+				//TEST
+				Console.WriteLine("lastSelectedJobName set to:" + lastSelectedJobName);
+            }
 	    }
 		
 		public void invokeAddJobToTV(int jobID, string name, string status, string remaining, 
@@ -395,18 +419,27 @@ namespace loki
 		{
 			if(lastSelectedJobName != null)
 			{
-				MessageDialog md = new MessageDialog (this, 
-						DialogFlags.DestroyWithParent, MessageType.Question, 
-					    ButtonsType.YesNo, "Remove job '" + lastSelectedJobName + "' from the queue?");
-		
-				ResponseType result = (ResponseType)md.Run ();
-	
-				if (result == ResponseType.Yes)
-				{	
-	                q.deliverNotice(new Notice("remove", lastSelectedJobName));
+				if(!q.checkIfJobDone(lastSelectedJobName))
+				{
+					MessageDialog md = new MessageDialog (this, 
+							DialogFlags.DestroyWithParent, MessageType.Question, 
+						    ButtonsType.YesNo, "Job '" + lastSelectedJobName + 
+					        "' is not finished. Remove it from the queue?");
+			
+					ResponseType result = (ResponseType)md.Run ();
+					if (result == ResponseType.Yes)
+					{	
+		                q.deliverNotice(new Notice("remove", lastSelectedJobName));
+						lastSelectedJobName = null;	//otherwise we'll get index out of range if we remove again without another select
+					}
+					md.Destroy();
 				}
-				md.Destroy();
-				lastSelectedJobName = null;	//otherwise we'll get index out of range if we remove again without another select
+				else	//job is finished so don't ask; just remove it
+				{
+					q.deliverNotice(new Notice("remove", lastSelectedJobName));
+					lastSelectedJobName = null;	//otherwise we'll get index out of range if we remove again without another select
+				}
+				
 			}
 			else
 			{
@@ -435,6 +468,21 @@ namespace loki
 		protected virtual void OnHelpAction1Activated (object sender, System.EventArgs e)
 		{
 			System.Diagnostics.Process.Start("http://loki-render.berlios.de/index.php/help");
+		}
+
+	 	[GLib.ConnectBeforeAttribute]
+		protected virtual void OnJobsViewButtonPressEvent (object o, Gtk.ButtonPressEventArgs args)
+		{
+			Gdk.EventButton eb = args.Event;
+			if(eb.Button == 3)
+			{	
+				jMenu.Popup(null, null, null, 3, Gtk.Global.CurrentEventTime);
+			}
+		}
+
+		protected virtual void OnRemoveAllFinishedActionActivated (object sender, System.EventArgs e)
+		{
+			q.deliverNotice(new Notice("removeFinished"));
 		}
 	}	
 }

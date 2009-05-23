@@ -305,7 +305,7 @@ namespace loki
 										}
 										else if(tokens[2] == "programOutputFailure")
 										{
-											errorMsg = "program output indicated a failure";
+											errorMsg = tokens[3];
 										}
 										else if(tokens[2] == "shutdown")
 										{

@@ -8,6 +8,13 @@
     <widget-library name="glade-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
     <widget-library name="../bin/Debug/loki.exe" internal="true" />
   </import>
+  <icon-factory>
+    <icon-set id="loki">
+      <source>
+        <property name="Image">resource:Esther.png</property>
+      </source>
+    </icon-set>
+  </icon-factory>
   <widget class="Gtk.Window" id="loki.MasterWin" design-size="736 485">
     <action-group name="Default">
       <action id="JobsAction">
@@ -23,10 +30,10 @@
         <property name="StockId">gtk-new</property>
         <signal name="Activated" handler="OnAddActionActivated" />
       </action>
-      <action id="RemoveAction">
+      <action id="RemoveSelectedAction">
         <property name="Type">Action</property>
         <property name="Accelerator">&lt;Control&gt;&lt;Mod2&gt;r</property>
-        <property name="Label" translatable="yes">Remove</property>
+        <property name="Label" translatable="yes">Remove selected</property>
         <property name="ShortLabel" translatable="yes">Remove</property>
         <property name="StockId">gtk-delete</property>
         <signal name="Activated" handler="OnRemoveActionActivated" />
@@ -58,10 +65,18 @@
         <property name="StockId">gtk-about</property>
         <signal name="Activated" handler="OnAboutActionActivated" />
       </action>
+      <action id="RemoveAllFinishedAction">
+        <property name="Type">Action</property>
+        <property name="Accelerator">&lt;Control&gt;f</property>
+        <property name="Label" translatable="yes">Remove all finished</property>
+        <property name="ShortLabel" translatable="yes">Remove all finished</property>
+        <property name="StockId">gtk-clear</property>
+        <signal name="Activated" handler="OnRemoveAllFinishedActionActivated" />
+      </action>
     </action-group>
     <property name="MemberName" />
     <property name="Title" translatable="yes">Loki master</property>
-    <property name="Icon">stock:gtk-yes Menu</property>
+    <property name="Icon">resource:Esther.png</property>
     <property name="WindowPosition">Center</property>
     <signal name="DeleteEvent" handler="OnDeleteEvent" />
     <child>
@@ -75,7 +90,8 @@
               <node type="Menu" action="JobsAction">
                 <node type="Menuitem" action="NewAction" />
                 <node type="Menuitem" action="EditAction" />
-                <node type="Menuitem" action="RemoveAction" />
+                <node type="Menuitem" action="RemoveSelectedAction" />
+                <node type="Menuitem" action="RemoveAllFinishedAction" />
               </node>
               <node type="Menu" action="HelpAction">
                 <node type="Menuitem" action="OnlineHelpAction" />
@@ -164,6 +180,7 @@
                                 <property name="MemberName" />
                                 <property name="CanFocus">True</property>
                                 <property name="ShowScrollbars">True</property>
+                                <signal name="ButtonPressEvent" handler="OnJobsViewButtonPressEvent" />
                               </widget>
                             </child>
                           </widget>

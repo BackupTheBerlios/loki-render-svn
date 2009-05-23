@@ -129,6 +129,15 @@ namespace loki
 			return id;
 		}
 		
+		//called by MasterWin //TODO - really shouldn't let Gtk thread touch the jobs list!
+		public bool checkIfJobDone(string jName)
+		{
+			if(jobs[findJobIndex(jName)].Status == 'd')
+				return true;
+			else
+				return false;
+		}
+		
 		//pulls the last session's jobs from the lokiRender.cfg file and adds them to the queue.
 		bool loadJobsFromCfg()
 		{
@@ -317,6 +326,16 @@ namespace loki
 						win.invokeModalMsg("info", "A job can't be removed while it has tasks running.");
                     }
                 }
+				else if (n.noticeType == "removeFinished")
+				{
+					foreach(Job j in jobs)
+					{
+						if(j.Status == 'd')
+						{
+							deliverNotice(new Notice("remove", j.name));
+						}
+					}	
+				}
 				else if (n.noticeType == "startEdit")
 				{
 					int index = findJobIndex(n.jobName);
@@ -537,7 +556,7 @@ namespace loki
                     clients[findClientIndex(n.clientID)].status = "available";
 					cName = clients[findClientIndex(n.clientID)].name;
                 }
-				win.invokeUpdateGruntTV(n.clientID, "ready");
+				win.invokeUpdateGruntTV(n.clientID, "ready", "failed");
                 jobs[jIndex].frames[n.frameIndex].failures++;
 
                 if (jobs[jIndex].frames[n.frameIndex].failures >= jobs[jIndex].failureAllowance)
@@ -584,7 +603,6 @@ namespace loki
 					taskTime = clients[clientIndex].getRunningTaskTime();
                 } 
 				win.invokeUpdateGruntTV(n.clientID, "ready", taskTime);
-				Console.WriteLine("taskTime: " + taskTime + " seconds.");
 				
                 jobs[jIndex].frames[n.frameIndex].status = "finished";
                 jobs[jIndex].updateMyStatus();

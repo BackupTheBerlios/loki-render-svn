@@ -52,9 +52,9 @@ namespace loki
 			return result; 
 		}
 		
-		public static bool checkStdout(string type, string stdout)
+		public static string checkStdout(string type, string stdout)
 		{
-			bool result;
+			string result;
 			switch(type)
 			{
 			case "blender":
@@ -196,16 +196,26 @@ namespace loki
 			return "ok"; //all our checks passed; return "ok".
 		}
 		
-		static bool blender_checkStdout(string stdout)
+		static string blender_checkStdout(string stdout)
 		{
 			if(stdout.Contains("Saved:"))
 			{
-				return true;	
+				return "ok";	
+			}
+			else if(stdout.Contains("Render error:"))
+			{
+				Console.WriteLine(stdout);
+				int startIndex = stdout.IndexOf("Render error:");
+				int endIndex = stdout.IndexOf("\n", startIndex);
+				
+				//TEST
+				Console.WriteLine(startIndex + ":" + endIndex);
+				return stdout.Substring(startIndex, (endIndex - startIndex));
 			}
 			else
 			{
 				Console.WriteLine(stdout);
-				return false;
+				return "Blender quit with an error.";
 			}
 		}
 	}

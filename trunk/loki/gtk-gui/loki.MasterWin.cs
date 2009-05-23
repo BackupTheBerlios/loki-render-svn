@@ -19,7 +19,7 @@ namespace loki {
         
         private Gtk.Action NewAction;
         
-        private Gtk.Action RemoveAction;
+        private Gtk.Action RemoveSelectedAction;
         
         private Gtk.Action EditAction;
         
@@ -28,6 +28,8 @@ namespace loki {
         private Gtk.Action OnlineHelpAction;
         
         private Gtk.Action AboutAction;
+        
+        private Gtk.Action RemoveAllFinishedAction;
         
         private Gtk.VBox vbox1;
         
@@ -88,9 +90,9 @@ namespace loki {
             this.NewAction = new Gtk.Action("NewAction", "New", null, "gtk-new");
             this.NewAction.ShortLabel = "Add";
             w1.Add(this.NewAction, "<Control><Mod2>n");
-            this.RemoveAction = new Gtk.Action("RemoveAction", "Remove", null, "gtk-delete");
-            this.RemoveAction.ShortLabel = "Remove";
-            w1.Add(this.RemoveAction, "<Control><Mod2>r");
+            this.RemoveSelectedAction = new Gtk.Action("RemoveSelectedAction", "Remove selected", null, "gtk-delete");
+            this.RemoveSelectedAction.ShortLabel = "Remove";
+            w1.Add(this.RemoveSelectedAction, "<Control><Mod2>r");
             this.EditAction = new Gtk.Action("EditAction", "Edit", null, "gtk-open");
             this.EditAction.ShortLabel = "Edit";
             w1.Add(this.EditAction, "<Control><Mod2>e");
@@ -103,18 +105,21 @@ namespace loki {
             this.AboutAction = new Gtk.Action("AboutAction", "About", null, "gtk-about");
             this.AboutAction.ShortLabel = "About";
             w1.Add(this.AboutAction, null);
+            this.RemoveAllFinishedAction = new Gtk.Action("RemoveAllFinishedAction", "Remove all finished", null, "gtk-clear");
+            this.RemoveAllFinishedAction.ShortLabel = "Remove all finished";
+            w1.Add(this.RemoveAllFinishedAction, "<Control>f");
             this.UIManager.InsertActionGroup(w1, 0);
             this.AddAccelGroup(this.UIManager.AccelGroup);
             this.Name = "loki.MasterWin";
             this.Title = "Loki master";
-            this.Icon = Stetic.IconLoader.LoadIcon(this, "gtk-yes", Gtk.IconSize.Menu, 16);
+            this.Icon = Gdk.Pixbuf.LoadFromResource("Esther.png");
             this.WindowPosition = ((Gtk.WindowPosition)(1));
             // Container child loki.MasterWin.Gtk.Container+ContainerChild
             this.vbox1 = new Gtk.VBox();
             this.vbox1.Name = "vbox1";
             this.vbox1.Spacing = 6;
             // Container child vbox1.Gtk.Box+BoxChild
-            this.UIManager.AddUiFromString("<ui><menubar name='menubar1'><menu name='JobsAction' action='JobsAction'><menuitem name='NewAction' action='NewAction'/><menuitem name='EditAction' action='EditAction'/><menuitem name='RemoveAction' action='RemoveAction'/></menu><menu name='HelpAction' action='HelpAction'><menuitem name='OnlineHelpAction' action='OnlineHelpAction'/><menuitem name='AboutAction' action='AboutAction'/></menu></menubar></ui>");
+            this.UIManager.AddUiFromString("<ui><menubar name='menubar1'><menu name='JobsAction' action='JobsAction'><menuitem name='NewAction' action='NewAction'/><menuitem name='EditAction' action='EditAction'/><menuitem name='RemoveSelectedAction' action='RemoveSelectedAction'/><menuitem name='RemoveAllFinishedAction' action='RemoveAllFinishedAction'/></menu><menu name='HelpAction' action='HelpAction'><menuitem name='OnlineHelpAction' action='OnlineHelpAction'/><menuitem name='AboutAction' action='AboutAction'/></menu></menubar></ui>");
             this.menubar1 = ((Gtk.MenuBar)(this.UIManager.GetWidget("/menubar1")));
             this.menubar1.Name = "menubar1";
             this.vbox1.Add(this.menubar1);
@@ -289,10 +294,12 @@ namespace loki {
             this.Show();
             this.DeleteEvent += new Gtk.DeleteEventHandler(this.OnDeleteEvent);
             this.NewAction.Activated += new System.EventHandler(this.OnAddActionActivated);
-            this.RemoveAction.Activated += new System.EventHandler(this.OnRemoveActionActivated);
+            this.RemoveSelectedAction.Activated += new System.EventHandler(this.OnRemoveActionActivated);
             this.EditAction.Activated += new System.EventHandler(this.OnEditActionActivated);
             this.OnlineHelpAction.Activated += new System.EventHandler(this.OnHelpAction1Activated);
             this.AboutAction.Activated += new System.EventHandler(this.OnAboutActionActivated);
+            this.RemoveAllFinishedAction.Activated += new System.EventHandler(this.OnRemoveAllFinishedActionActivated);
+            this.jobsView.ButtonPressEvent += new Gtk.ButtonPressEventHandler(this.OnJobsViewButtonPressEvent);
             this.btnStart.Clicked += new System.EventHandler(this.OnBtnStartClicked);
         }
     }

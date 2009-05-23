@@ -368,6 +368,7 @@ namespace loki
 			bool solo = false;//if we lose our connection, indicates we'll attempt to finish task w/ out telling master
 			bool remoteShutdown = false;//master is shutting down: told us to kill task
 			bool taskOutputShowsFailure = false;
+			string taskOutputFailureString = "";
             string pathCheck, platform;;
 			string[] t = sock.convert2Tokens(msg);		
 			
@@ -497,8 +498,15 @@ namespace loki
 							
 							if(taskFinished)
 	                        {   
-								success = TaskTypeCatalog.checkStdout(t[1], taskProcess.StandardOutput.ReadToEnd());
-								taskOutputShowsFailure = true;
+								string stdoutResult = TaskTypeCatalog.checkStdout(t[1], taskProcess.StandardOutput.ReadToEnd());
+								if(stdoutResult == "ok")
+									success = true;
+								else
+								{
+									taskOutputShowsFailure = true;
+									taskOutputFailureString = stdoutResult;
+									success = false;
+								}
 						    }
 						    else //if we come here, we have a shutdown signal (we broke out of the taskFinished loop)
 	                            success = false;    
@@ -550,7 +558,7 @@ namespace loki
 					    }
 						else if(taskOutputShowsFailure)
 						{
-							if(!sock.writeStream("update*failed*programOutputFailure"))
+							if(!sock.writeStream("update*failed*programOutputFailure*" + taskOutputFailureString + "*"))
 	                        {
 	                            //oops, lost our connection!
 	                            connected = false;
