@@ -120,7 +120,7 @@ namespace loki {
             // Widget loki.AddJobWin
             this.Name = "loki.AddJobWin";
             this.Title = "Job";
-            this.Icon = Stetic.IconLoader.LoadIcon(this, "gtk-yes", Gtk.IconSize.Menu, 16);
+            this.Icon = Gdk.Pixbuf.LoadFromResource("16x16.png");
             this.WindowPosition = ((Gtk.WindowPosition)(4));
             this.Modal = true;
             // Container child loki.AddJobWin.Gtk.Container+ContainerChild

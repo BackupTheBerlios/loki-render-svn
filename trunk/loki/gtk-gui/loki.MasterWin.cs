@@ -112,7 +112,7 @@ namespace loki {
             this.AddAccelGroup(this.UIManager.AccelGroup);
             this.Name = "loki.MasterWin";
             this.Title = "Loki master";
-            this.Icon = Gdk.Pixbuf.LoadFromResource("Esther.png");
+            this.Icon = Gdk.Pixbuf.LoadFromResource("16x16.png");
             this.WindowPosition = ((Gtk.WindowPosition)(1));
             // Container child loki.MasterWin.Gtk.Container+ContainerChild
             this.vbox1 = new Gtk.VBox();

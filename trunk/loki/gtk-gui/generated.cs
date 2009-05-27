@@ -19,8 +19,8 @@ namespace Stetic {
             if ((Stetic.Gui.initialized == false)) {
                 Stetic.Gui.initialized = true;
                 Gtk.IconFactory w1 = new Gtk.IconFactory();
-                Gtk.IconSet w2 = new Gtk.IconSet(Gdk.Pixbuf.LoadFromResource("Esther.png"));
-                w1.Add("loki", w2);
+                Gtk.IconSet w2 = new Gtk.IconSet(Gdk.Pixbuf.LoadFromResource("16x16.png"));
+                w1.Add("loki16", w2);
                 w1.AddDefault();
             }
         }

@@ -9,9 +9,9 @@
     <widget-library name="../bin/Debug/loki.exe" internal="true" />
   </import>
   <icon-factory>
-    <icon-set id="loki">
+    <icon-set id="loki16">
       <source>
-        <property name="Image">resource:Esther.png</property>
+        <property name="Image">resource:16x16.png</property>
       </source>
     </icon-set>
   </icon-factory>
@@ -76,7 +76,7 @@
     </action-group>
     <property name="MemberName" />
     <property name="Title" translatable="yes">Loki master</property>
-    <property name="Icon">resource:Esther.png</property>
+    <property name="Icon">resource:16x16.png</property>
     <property name="WindowPosition">Center</property>
     <signal name="DeleteEvent" handler="OnDeleteEvent" />
     <child>
@@ -329,7 +329,7 @@
   <widget class="Gtk.Window" id="loki.GruntWin" design-size="420 108">
     <property name="MemberName" />
     <property name="Title" translatable="yes">Loki grunt</property>
-    <property name="Icon">stock:gtk-yes Menu</property>
+    <property name="Icon">resource:16x16.png</property>
     <signal name="DeleteEvent" handler="OnDeleteEvent" />
     <child>
       <widget class="Gtk.Alignment" id="alignment5">
@@ -444,7 +444,7 @@
   <widget class="Gtk.Dialog" id="loki.RoleDialog" design-size="400 203">
     <property name="MemberName" />
     <property name="Title" translatable="yes">Loki Role</property>
-    <property name="Icon">stock:gtk-yes Menu</property>
+    <property name="Icon">resource:16x16.png</property>
     <property name="WindowPosition">CenterOnParent</property>
     <property name="Buttons">1</property>
     <property name="HelpButton">False</property>
@@ -594,7 +594,7 @@
   <widget class="Gtk.Window" id="loki.AddJobWin" design-size="624 489">
     <property name="MemberName" />
     <property name="Title" translatable="yes">Job</property>
-    <property name="Icon">stock:gtk-yes Menu</property>
+    <property name="Icon">resource:16x16.png</property>
     <property name="WindowPosition">CenterOnParent</property>
     <property name="Modal">True</property>
     <signal name="DeleteEvent" handler="OnDeleteEvent" />

@@ -38,7 +38,7 @@ namespace loki {
             // Widget loki.RoleDialog
             this.Name = "loki.RoleDialog";
             this.Title = "Loki Role";
-            this.Icon = Stetic.IconLoader.LoadIcon(this, "gtk-yes", Gtk.IconSize.Menu, 16);
+            this.Icon = Gdk.Pixbuf.LoadFromResource("16x16.png");
             this.WindowPosition = ((Gtk.WindowPosition)(4));
             this.HasSeparator = false;
             // Internal child loki.RoleDialog.VBox

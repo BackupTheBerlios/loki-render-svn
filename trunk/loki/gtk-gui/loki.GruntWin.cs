@@ -38,7 +38,7 @@ namespace loki {
             // Widget loki.GruntWin
             this.Name = "loki.GruntWin";
             this.Title = "Loki grunt";
-            this.Icon = Stetic.IconLoader.LoadIcon(this, "gtk-yes", Gtk.IconSize.Menu, 16);
+            this.Icon = Gdk.Pixbuf.LoadFromResource("16x16.png");
             // Container child loki.GruntWin.Gtk.Container+ContainerChild
             this.alignment5 = new Gtk.Alignment(0.5F, 0.5F, 1F, 1F);
             this.alignment5.Name = "alignment5";

@@ -49,7 +49,7 @@
     <EmbeddedResource Include="gtk-gui\gui.stetic">
       <LogicalName>gui.stetic</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\..\..\..\..\home\daniel\Desktop\Esther.png" />
+    <EmbeddedResource Include="..\..\..\..\..\home\daniel\a1\daniel\programming\md_projects\loki\images\16x16.png" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="gtk-gui\generated.cs" />
