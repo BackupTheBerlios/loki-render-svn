@@ -63,7 +63,7 @@ namespace loki
 			double runningTime = (DateTime.UtcNow - startTime).TotalSeconds;
 			TimeSpan t = TimeSpan.FromSeconds(runningTime);
 			//return t.Hours + ":" + t.Minutes + ":" + t.Seconds + "." + String.Format("{0:F0}", (t.Milliseconds/10));
-			return String.Format("{0:D2}:{1:D2}:{2:D2}.{3:D2}", t.Hours, t.Minutes, t.Seconds, t.Milliseconds/10);
+			return String.Format("{0:D2}:{1:D2}:{2:D2}:{3:D2}.{4:D1}", t.Days, t.Hours, t.Minutes, t.Seconds, t.Milliseconds/100);
 		}
 
 		/// <summary>

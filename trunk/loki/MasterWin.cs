@@ -27,6 +27,8 @@ namespace loki
 {
 	public partial class MasterWin: Gtk.Window
 	{	
+		static string lokiVersion = "Version 0.5.2";
+		
 		ListStore gruntList;
 		ListStore jobList;
 		Queue q;
@@ -48,10 +50,10 @@ namespace loki
 			
 			//jobsView context menu initialization
 			jMenu = new Menu();
-			addJob = new MenuItem("new job");
-			editJob = new MenuItem("edit job");
-			removeJob = new MenuItem("remove job");
-			removeFinishedJobs = new MenuItem("remove finished jobs");
+			addJob = new MenuItem("New job");
+			editJob = new MenuItem("Edit selected job");
+			removeJob = new MenuItem("Remove selected job");
+			removeFinishedJobs = new MenuItem("Remove finished jobs");
 			
 			addJob.Show();
 			removeFinishedJobs.Show();
@@ -78,8 +80,6 @@ namespace loki
             if (((TreeSelection)o).GetSelected (out model, out iter))
             {
             	lastSelectedJobName = (string) model.GetValue (iter, 1);
-				//TEST
-				Console.WriteLine("lastSelectedJobName set to:" + lastSelectedJobName);
             }
 	    }
 		
@@ -461,13 +461,14 @@ namespace loki
 
 		protected virtual void OnAboutActionActivated (object sender, System.EventArgs e)
 		{
-			showModalMsg("info", "Loki Render\r\nVersion 0.5\r\n\r\nBuilt on Mono and Gtk#\r\n\r\n" +
-			             "(C) 2009, Daniel Petersen\r\n\r\nGNU General Public License Version 3" );
+			showModalMsg("info", "Loki Render\r\n" + lokiVersion +
+			             "\r\n\r\nBuilt on Mono and Gtk#\r\n\r\n" +
+			             "(C) 2009, Daniel Petersen\r\n\r\nGNU GPL v3" );
 		}
 
 		protected virtual void OnHelpAction1Activated (object sender, System.EventArgs e)
 		{
-			System.Diagnostics.Process.Start("http://loki-render.berlios.de/index.php/help");
+			System.Diagnostics.Process.Start("http://loki-render.berlios.de/index.php/docs");
 		}
 
 	 	[GLib.ConnectBeforeAttribute]

@@ -208,8 +208,6 @@ namespace loki
 				int startIndex = stdout.IndexOf("Render error:");
 				int endIndex = stdout.IndexOf("\n", startIndex);
 				
-				//TEST
-				Console.WriteLine(startIndex + ":" + endIndex);
 				return stdout.Substring(startIndex, (endIndex - startIndex));
 			}
 			else
