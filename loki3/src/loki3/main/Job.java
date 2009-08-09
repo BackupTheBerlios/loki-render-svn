@@ -23,6 +23,7 @@ package loki3.main;
 
 /**
  *
+ * 
  * @author daniel
  */
 public class Job {
