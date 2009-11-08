@@ -509,6 +509,9 @@ public class GruntR implements Runnable, ICommon {
                         } else if (task.getStatus() == TaskStatus.MASTER_ABORT) {
                             task = null;    //ditch current task
                             sendHdr(new Hdr(HdrType.IDLE));
+                        } else if (task.getStatus() == TaskStatus.FAILED) {
+                            task = null;
+                            sendHdr(new Hdr(HdrType.IDLE));
                         }
                     } else {
                         GruntEQCaller.invokeUpdateStatus(gruntForm,
@@ -550,7 +553,8 @@ public class GruntR implements Runnable, ICommon {
             } else if (task.getStatus() == TaskStatus.FAILED) {
                 GruntEQCaller.invokeUpdateStatus(gruntForm,
                         new GruntStatusText(GruntTxtStatus.ERROR));
-                log.warning("task failed with output: " + task.getStdout());
+                log.warning("task failed with output: " + task.getStdout() +
+                        "\n" + task.getErrOut());
             } else {
                 log.warning("unknown task type in runTaskWrapper");
             }

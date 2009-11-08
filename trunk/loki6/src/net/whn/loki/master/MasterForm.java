@@ -53,7 +53,7 @@ public class MasterForm extends LokiForm implements ICommon {
     public MasterForm(MasterR m) {
         manager = m;
         jobsModel = m.getJobsModel();
-        gruntsModel = m.getBrokersModel();
+        brokersModel = m.getBrokersModel();
         initComponents();
         queueRunning = false;
         progressBarQueue.setStringPainted(true);
@@ -136,7 +136,7 @@ public class MasterForm extends LokiForm implements ICommon {
 
     private final MasterR manager;
     private final JobsModel jobsModel;
-    private final BrokersModel gruntsModel;
+    private final BrokersModel brokersModel;
     private final PreferencesForm prefForm;
     private boolean queueRunning;
 
@@ -235,7 +235,7 @@ public class MasterForm extends LokiForm implements ICommon {
         jobsTable.setToolTipText("right-click for a context-sensitive popup menu");
         scrollJobs.setViewportView(jobsTable);
 
-        gruntsTable.setModel(gruntsModel);
+        gruntsTable.setModel(brokersModel);
         gruntsTable.setToolTipText("right-click for a context-sensitive popup menu");
         scrollGrunts.setViewportView(gruntsTable);
 

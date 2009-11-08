@@ -589,8 +589,16 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
             Task t = tReport.getTask();
             jobsModel.setTaskStatus(t.getJobID(), t.getTaskID(),
                     TaskStatus.READY);
+            String failureMsg;
+            if(t.getStdout().length() > 0) {
+                failureMsg = t.getStdout();
+            } else if (t.getErrOut().length() > 0) {
+                failureMsg = t.getErrOut();
+            } else
+                failureMsg = "unknown";
+
             String failed = "Task failed for grunt " + brokersModel.getGruntName(
-                    t.getGruntID()) + " with the message:\n\"" + t.getStdout() +
+                    t.getGruntID()) + " with the message:\n\"" + failureMsg +
                     "\"\nThe queue has been stopped.";
 
             MasterEQCaller.showMessageDialog(masterForm, "task failed",
