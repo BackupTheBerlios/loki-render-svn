@@ -4,7 +4,6 @@
  *Copyright (C) 2009 Daniel Petersen
  *Created on Sep 10, 2009
  */
-
 /**
  *This program is free software: you can redistribute it and/or modify
  *it under the terms of the GNU General Public License as published by
@@ -19,11 +18,11 @@
  *You should have received a copy of the GNU General Public License
  *along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.whn.loki.master;
 
 import net.whn.loki.common.*;
 import java.awt.EventQueue;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -36,10 +35,9 @@ public class MasterEQCaller extends EQCallerA {
      * @param mForm
      */
     public static void invokeStop(final MasterForm mForm) {
-        EventQueue.invokeLater(new Runnable()
-        {
-            public void run()
-            {
+        EventQueue.invokeLater(new Runnable() {
+
+            public void run() {
                 mForm.stopQueue();
             }
         });
@@ -52,10 +50,9 @@ public class MasterEQCaller extends EQCallerA {
      */
     public static void invokeUpdateCores(final MasterForm mForm,
             final int cores) {
-        EventQueue.invokeLater(new Runnable()
-        {
-            public void run()
-            {
+        EventQueue.invokeLater(new Runnable() {
+
+            public void run() {
                 mForm.updateCores(cores);
             }
         });
@@ -63,10 +60,9 @@ public class MasterEQCaller extends EQCallerA {
 
     public static void invokeViewGruntDetails(final MasterForm mForm,
             final GruntDetails details) {
-        EventQueue.invokeLater(new Runnable()
-        {
-            public void run()
-            {
+        EventQueue.invokeLater(new Runnable() {
+
+            public void run() {
                 mForm.viewGruntDetails(details);
             }
         });
@@ -74,8 +70,8 @@ public class MasterEQCaller extends EQCallerA {
 
     public static void invokeViewJobDetails(final MasterForm mForm,
             final Job job) {
-        EventQueue.invokeLater(new Runnable()
-        {
+        EventQueue.invokeLater(new Runnable() {
+
             public void run() {
                 mForm.viewJobDetails(job);
             }
@@ -95,21 +91,52 @@ public class MasterEQCaller extends EQCallerA {
         EventQueue.invokeLater(uPB);
     }
 
-    /*BEGIN PRIVATE*/
+    public static void invokeTaskFailureNotification(final MasterForm mForm,
+            final String failureStr) {
+        EventQueue.invokeLater(new Runnable() {
 
+            @Override
+            public void run() {
+                Object[] options = {"OK", "Stop the Queue"};
+                String prelude =
+                        "One or more tasks in the job queue have failed.\n" +
+                        "Below is the first error message. You can view job\n" +
+                        "details for more information.\n\n\"";
+                if (!failureMsgOpen) {
+                    failureMsgOpen = true;
+                    int result = JOptionPane.showOptionDialog(
+                            mForm,
+                            prelude + failureStr + "\"",
+                            "task failed",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE,
+                            null,
+                            options,
+                            options[0]);
+
+                    if (result == 1) {
+                        mForm.stopQueue();
+                    }
+                    failureMsgOpen = false;
+                }
+            }
+        });
+    }
+
+    /*BEGIN PRIVATE*/
     private static UpdateProgressBar uPB;
+    private static boolean failureMsgOpen = false;
 
     private static class UpdateProgressBar implements Runnable {
+
         UpdateProgressBar(MasterForm mF, ProgressUpdate u) {
-           mForm = mF;
-           update = u;
+            mForm = mF;
+            update = u;
         }
 
-        public void run()
-        {
+        public void run() {
             mForm.updateProgressBar(update);
         }
-
         private final MasterForm mForm;
         private final ProgressUpdate update;
     }

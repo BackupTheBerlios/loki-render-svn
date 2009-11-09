@@ -219,7 +219,7 @@ public class GruntR implements Runnable, ICommon {
 
     void handleFatalException(Exception ex) {
         //TODO - any general stuff in here?
-        ErrorHelper.outputToLogAndMsg(gruntForm, log,
+        ErrorHelper.outputToLogMsgAndKill(gruntForm, log,
                 "Fatal error. Click ok to exit.", ex);
 
         shutdown();

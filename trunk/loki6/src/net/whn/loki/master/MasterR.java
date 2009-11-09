@@ -150,7 +150,7 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
                  */
                 break;
             } catch (IOException ex) {
-                ErrorHelper.outputToLogAndMsg(masterForm, log,
+                ErrorHelper.outputToLogMsgAndKill(masterForm, log,
                     "Loki encountered an error", ex);
             } catch (MasterFrozenException mfe) {
                 //impossible
@@ -240,6 +240,8 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
             queueStarting();
         } else if (type == MsgType.TASK_REPORT) {
             handleReport(m);
+        } else if (type == MsgType.RESET_FAILURES) {
+            resetFailures(m);
         } else if (type == MsgType.FILE_REQUEST) {
             brokersModel.handleFileRequest(m);
         } else if (type == MsgType.ABORT_ALL) {
@@ -259,7 +261,7 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
         FatalThrowableMsg fatalMsg = (FatalThrowableMsg) m;
         Throwable throwable = fatalMsg.getThrowable();
 
-        ErrorHelper.outputToLogAndMsg(masterForm, log,
+        ErrorHelper.outputToLogMsgAndKill(masterForm, log,
                 "Loki encountered a fatal error.\n" +
                 "Click OK to exit.", throwable);
 
@@ -302,6 +304,11 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
             }
 
         }
+    }
+
+    private void resetFailures(Msg m) {
+        final ResetFailuresMsg msg = (ResetFailuresMsg) m;
+        jobsModel.resetFailures(msg.getRows());
     }
 
     /**
@@ -587,8 +594,7 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
         } else if (tReport.getTask().getStatus() == TaskStatus.FAILED) {
             //task failed
             Task t = tReport.getTask();
-            jobsModel.setTaskStatus(t.getJobID(), t.getTaskID(),
-                    TaskStatus.READY);
+            jobsModel.setReturnTask(tReport);
             String failureMsg;
             if(t.getStdout().length() > 0) {
                 failureMsg = t.getStdout();
@@ -597,16 +603,14 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
             } else
                 failureMsg = "unknown";
 
-            String failed = "Task failed for grunt " + brokersModel.getGruntName(
-                    t.getGruntID()) + " with the message:\n\"" + failureMsg +
-                    "\"\nThe queue has been stopped.";
+            String failed = "Task failed for grunt '" +
+                    brokersModel.getGruntName(t.getGruntID()) +
+                    "' with the message:\n\"" + failureMsg + "\"";
 
-            MasterEQCaller.showMessageDialog(masterForm, "task failed",
-                    failed, JOptionPane.INFORMATION_MESSAGE);
+
+
+            MasterEQCaller.invokeTaskFailureNotification(masterForm, failureMsg);
             log.warning(failed);
-
-            setQueueRunningFalse();
-            MasterEQCaller.invokeStop(masterForm);
 
         } else if (tReport.getTask().getStatus() == TaskStatus.LOCAL_ABORT) {
             Task t = tReport.getTask();
@@ -636,6 +640,7 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
             outputFile = new File(outputDir, fName);
         }
 
+        @Override
         public void run() {
             long start = System.currentTimeMillis();
             ImageHelper.compositeTiles(tileDir, tilesPerFrame, outputFile);

@@ -51,6 +51,7 @@ public class Task implements ICommon, Serializable, Cloneable {
 
         status = TaskStatus.READY;
         gruntID = -1;
+        gruntName = "";
 
         //given values after task has run
         taskCL = null;
@@ -133,17 +134,20 @@ public class Task implements ICommon, Serializable, Cloneable {
         gruntID = gID;
     }
 
+    public void setGruntName(String gName) {
+        gruntName = gName;
+    }
+
+    public String getGruntName() {
+        return gruntName;
+    }
+
     public String getProjectFileMD5() {
         return projectFileMD5;
     }
 
     public long getProjectFileSize() {
         return projectFileSize;
-    }
-
-    public void setTaskOutput(String out, String err) {
-        stdout = out;
-        errout = err;
     }
 
     public String[] getTaskCL() {
@@ -226,6 +230,7 @@ public class Task implements ICommon, Serializable, Cloneable {
     private final TileBorder tileBorder;
     private volatile TaskStatus status;
     private long gruntID;
+    private String gruntName;
     //output
     private String[] taskCL;
     private String stdout;

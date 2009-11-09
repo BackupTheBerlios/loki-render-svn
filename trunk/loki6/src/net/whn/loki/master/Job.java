@@ -99,12 +99,13 @@ public class Job implements ICommon, Serializable {
      * @return
      */
     public String getTileStr() {
-        if(tileRender) {
+        if (tileRender) {
             String m = Integer.toString(tileMultiplier);
             return m + " * " + m + " = " + Integer.toString(
-                    tileMultiplier*tileMultiplier);
-        } else
+                    tileMultiplier * tileMultiplier);
+        } else {
             return "disabled";
+        }
     }
 
     /**
@@ -226,6 +227,15 @@ public class Job implements ICommon, Serializable {
 
     JobStatus getStatus() {
         return status;
+    }
+
+    void resetFailures() {
+        for (Task t : tasks) {
+            if (t.getStatus() == TaskStatus.FAILED) {
+                setTaskStatus(t.getTaskID(), TaskStatus.READY);
+                t.setInitialOutput(null, null, null);
+            }
+        }
     }
 
     /**
@@ -413,7 +423,7 @@ public class Job implements ICommon, Serializable {
      */
     private int getTaskIndex(long tID) {
         for (int i = 0; i < tasks.length; i++) {
-            if(tasks[i].getTaskID() == tID) {
+            if (tasks[i].getTaskID() == tID) {
                 return i;
             }
         }

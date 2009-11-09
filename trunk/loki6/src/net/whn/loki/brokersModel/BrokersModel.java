@@ -320,10 +320,10 @@ public class BrokersModel extends AbstractTableModel implements ICommon {
                         try {
                             b.sendRemoveGruntMsg();
                         } catch (InterruptedException iex) {
-                            ErrorHelper.outputToLogAndMsg(null, log,
+                            ErrorHelper.outputToLogMsgAndKill(null, log,
                                     "fatal error. exiting.", iex);
                         } catch (MasterFrozenException mfe) {
-                            ErrorHelper.outputToLogAndMsg(null, log,
+                            ErrorHelper.outputToLogMsgAndKill(null, log,
                                     "fatal error. exiting.", mfe);
                         }
                     }

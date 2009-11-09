@@ -88,29 +88,27 @@ public class JobDetailsForm extends LokiForm {
     }
 
     private void setTxtOutput() {
-        String txt = null;
+        String txt = "***select a task in the Task list***";
+        String cl = "";
         int row = tblTasks.getSelectedRow();
-        if (row == -1) {
-            txt = "*select a task in the 'Task list'*";
-        } else {    //we have a selected row
+        if (row != -1) {    //we have a selected row
             if (cbxOutput.getSelectedIndex() == 0) { //stdout
                 txt = tasks[row].getStdout();
             } else if (cbxOutput.getSelectedIndex() == 1) {  //errout
                 txt = tasks[row].getErrOut();
             }
-        }
-        txtOutput.setText(txt);
 
-        String cl = "";
-        String[] tokens = tasks[row].getTaskCL();
-        if (tokens != null) {
-            for (String token : tokens) {
-                cl += token + " ";
+            String[] tokens = tasks[row].getTaskCL();
+            if (tokens != null) {
+                for (String token : tokens) {
+                    cl += token + " ";
+                }
+            } else {
+                cl = "";
             }
-        } else {
-            cl = "";
         }
-
+        
+        txtOutput.setText(txt);
         txtTaskCL.setText(cl);
     }
 
@@ -282,8 +280,8 @@ public class JobDetailsForm extends LokiForm {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlTaskDetailLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlTaskDetailLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 507, Short.MAX_VALUE)
-                    .addComponent(txtTaskCL, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 507, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 501, Short.MAX_VALUE)
+                    .addComponent(txtTaskCL, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 501, Short.MAX_VALUE)
                     .addComponent(jLabel23, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(cbxOutput, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
@@ -383,7 +381,7 @@ public class JobDetailsForm extends LokiForm {
                 .addComponent(jLabel21)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblViewTime)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 600, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 653, Short.MAX_VALUE)
                 .addComponent(btnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -421,7 +419,7 @@ public class JobDetailsForm extends LokiForm {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addComponent(jLabel12)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 261, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -446,9 +444,9 @@ public class JobDetailsForm extends LokiForm {
                                 .addComponent(pnlDetail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(pnlTaskTally, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(pnlTaskDetail, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(pnlTaskDetail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -540,6 +538,7 @@ public class JobDetailsForm extends LokiForm {
             columnHeaders = new String[]{
                         "frame",
                         "tile",
+                        "grunt",
                         "status",
                         "time"
                     };
@@ -550,25 +549,31 @@ public class JobDetailsForm extends LokiForm {
             return columnHeaders[col].toString();
         }
 
+        @Override
         public int getRowCount() {
             return tasks.length;
         }
 
+        @Override
         public int getColumnCount() {
             return columnHeaders.length;
         }
 
+        @Override
         public Object getValueAt(int row, int column) {
             if (column == 0) {
                 return Integer.toString(tasks[row].getFrame());
             } else if (column == 1) {
-                if(tasks[row].getTile() == -1) {
+                if (tasks[row].getTile() == -1) {
                     return "n/a";
-                } else
+                } else {
                     return Integer.toString(tasks[row].getTile());
+                }
             } else if (column == 2) {
-                return tasks[row].getStatus().toString().toLowerCase();
+                return tasks[row].getGruntName();
             } else if (column == 3) {
+                return tasks[row].getStatus().toString().toLowerCase();
+            } else if (column == 4) {
                 return tasks[row].getTaskTime();
             } else {
                 return "";

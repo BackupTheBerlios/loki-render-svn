@@ -65,7 +65,7 @@ public class Main {
 
                     } catch (IOException ex) {
                         //fatal error during Announce startup
-                        ErrorHelper.outputToLogAndMsg(lokiForm, log,
+                        ErrorHelper.outputToLogMsgAndKill(lokiForm, log,
                                 "Loki encountered a fatal error.\n" +
                                 "Click OK to exit.", ex);
                         System.exit(-1);

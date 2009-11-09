@@ -37,6 +37,7 @@ import net.whn.loki.error.MasterFrozenException;
 import net.whn.loki.common.PreferencesForm;
 import net.whn.loki.error.ErrorHelper;
 import net.whn.loki.messaging.Msg;
+import net.whn.loki.messaging.ResetFailuresMsg;
 import net.whn.loki.messaging.ViewMsg;
 
 /**
@@ -121,9 +122,9 @@ public class MasterForm extends LokiForm implements ICommon {
         try {
             manager.deliverMessage(new AddJobMsg(j));
         } catch (InterruptedException IntEx) {
-            //TODO - don't know what to do with this - probably exit.
+            log.severe("interrupted exception: " + IntEx.toString());
         } catch (MasterFrozenException mfe) {
-            ErrorHelper.outputToLogAndMsg(this, log,
+            ErrorHelper.outputToLogMsgAndKill(this, log,
                     "fatal error. click ok to exit.", mfe.getCause());
             System.exit(-1);
         }
@@ -152,6 +153,7 @@ public class MasterForm extends LokiForm implements ICommon {
         pmenuJobOptions = new javax.swing.JPopupMenu();
         pmiViewJob = new javax.swing.JMenuItem();
         pmiRemoveJob = new javax.swing.JMenuItem();
+        pmiResetFailures = new javax.swing.JMenuItem();
         pmiAbortAll = new javax.swing.JMenuItem();
         pmenuGruntTable = new javax.swing.JPopupMenu();
         pmiViewGrunt = new javax.swing.JMenuItem();
@@ -174,6 +176,7 @@ public class MasterForm extends LokiForm implements ICommon {
         miNewJob = new javax.swing.JMenuItem();
         miViewJob = new javax.swing.JMenuItem();
         miRemoveJob = new javax.swing.JMenuItem();
+        miResetFailures = new javax.swing.JMenuItem();
         miAbortJob = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
         miViewGrunt = new javax.swing.JMenuItem();
@@ -195,6 +198,14 @@ public class MasterForm extends LokiForm implements ICommon {
             }
         });
         pmenuJobOptions.add(pmiRemoveJob);
+
+        pmiResetFailures.setText("Reset failed tasks");
+        pmiResetFailures.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pmiResetFailuresActionPerformed(evt);
+            }
+        });
+        pmenuJobOptions.add(pmiResetFailures);
 
         pmiAbortAll.setText("Abort all and stop queue");
         pmiAbortAll.addActionListener(new java.awt.event.ActionListener() {
@@ -306,6 +317,15 @@ public class MasterForm extends LokiForm implements ICommon {
             }
         });
         jobsMenu.add(miRemoveJob);
+
+        miResetFailures.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.CTRL_MASK));
+        miResetFailures.setText("Reset failed tasks");
+        miResetFailures.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miResetFailuresActionPerformed(evt);
+            }
+        });
+        jobsMenu.add(miResetFailures);
 
         miAbortJob.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_MASK));
         miAbortJob.setText("Abort all and stop queue");
@@ -430,10 +450,10 @@ public class MasterForm extends LokiForm implements ICommon {
                 manager.deliverMessage(new Msg(MsgType.START_QUEUE));
                 btnStart.setText("Stop");
             } catch (InterruptedException ex) {
-                ErrorHelper.outputToLogAndMsg(this, log,
+                ErrorHelper.outputToLogMsgAndKill(this, log,
                     "fatal error. click ok to exit.", ex);
             } catch (MasterFrozenException mfe) {
-                ErrorHelper.outputToLogAndMsg(this, log,
+                ErrorHelper.outputToLogMsgAndKill(this, log,
                     "fatal error. click ok to exit.", mfe.getCause());
                 System.exit(-1);
             }
@@ -481,8 +501,16 @@ public class MasterForm extends LokiForm implements ICommon {
         aboutForm.setVisible(true);
     }//GEN-LAST:event_miAboutActionPerformed
 
-    private void setupColumnHeaderTooltips() {
+    private void pmiResetFailuresActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pmiResetFailuresActionPerformed
+        resetFailures();
+    }//GEN-LAST:event_pmiResetFailuresActionPerformed
 
+    private void miResetFailuresActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miResetFailuresActionPerformed
+        resetFailures();
+    }//GEN-LAST:event_miResetFailuresActionPerformed
+
+    private void setupColumnHeaderTooltips() {
+        //TODO
     }
 
     private void newJob() {
@@ -523,6 +551,17 @@ public class MasterForm extends LokiForm implements ICommon {
         } else {
             JOptionPane.showMessageDialog(this,
                     "Please select a job, then select 'View Job Details'.");
+        }
+    }
+
+    private void resetFailures() {
+        int[] rows = jobsTable.getSelectedRows();
+
+        if(rows.length > 0) {
+            sendMsg2Manager(new ResetFailuresMsg(MsgType.RESET_FAILURES, rows));
+        } else {
+           JOptionPane.showMessageDialog(this,
+                "Please select one or more jobs first.");
         }
     }
 
@@ -583,11 +622,11 @@ public class MasterForm extends LokiForm implements ICommon {
         try {
             manager.deliverMessage(m);
         } catch (InterruptedException ex) {
-            ErrorHelper.outputToLogAndMsg(this, log,
+            ErrorHelper.outputToLogMsgAndKill(this, log,
                     "fatal error. click ok to exit.", ex);
             System.exit(-1);
         } catch (MasterFrozenException mfe) {
-            ErrorHelper.outputToLogAndMsg(this, log,
+            ErrorHelper.outputToLogMsgAndKill(this, log,
                     "fatal error. click ok to exit.", mfe.getCause());
             System.exit(-1);
         }
@@ -617,6 +656,7 @@ public class MasterForm extends LokiForm implements ICommon {
     private javax.swing.JMenuItem miPreferences;
     private javax.swing.JMenuItem miQuit;
     private javax.swing.JMenuItem miRemoveJob;
+    private javax.swing.JMenuItem miResetFailures;
     private javax.swing.JMenuItem miViewGrunt;
     private javax.swing.JMenuItem miViewJob;
     private javax.swing.JPopupMenu pmenuGruntTable;
@@ -625,6 +665,7 @@ public class MasterForm extends LokiForm implements ICommon {
     private javax.swing.JMenuItem pmiAbortAll;
     private javax.swing.JMenuItem pmiNewJob;
     private javax.swing.JMenuItem pmiRemoveJob;
+    private javax.swing.JMenuItem pmiResetFailures;
     private javax.swing.JMenuItem pmiViewGrunt;
     private javax.swing.JMenuItem pmiViewJob;
     private javax.swing.JProgressBar progressBarQueue;

@@ -39,7 +39,8 @@ public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
        JOptionPane.showMessageDialog(form, "Loki has encountered an error:\n" +
-               e.toString() + "\nPlease view the log for details.",
+               e.toString() + "\nPlease view the log for details.\n" +
+               "Wisdom would dictate restarting Loki at this point.",
                "Loki Render Error", JOptionPane.ERROR_MESSAGE);
        log.warning("uncaught throwable: " + e.getMessage());
     }

@@ -65,18 +65,18 @@ public class Broker implements Runnable, ICommon {
                 } catch (InterruptedException iex) {
                     //nothing to do here
                 } catch (MasterFrozenException mfe) {
-                    ErrorHelper.outputToLogAndMsg(null, log,
+                    ErrorHelper.outputToLogMsgAndKill(null, log,
                             "fatal error. exiting.", ex);
                 }
                 log.throwing(className, "run()", ex);
                 break;
             } catch (InterruptedException ex) {
-                ErrorHelper.outputToLogAndMsg(null, log,
+                ErrorHelper.outputToLogMsgAndKill(null, log,
                         "fatal error. exiting.", ex);
                 System.exit(-1);
                 break;
             } catch (MasterFrozenException mfe) {
-                ErrorHelper.outputToLogAndMsg(null, log,
+                ErrorHelper.outputToLogMsgAndKill(null, log,
                         "fatal error. exiting.", mfe);
                 System.exit(-1);
             }
@@ -85,11 +85,11 @@ public class Broker implements Runnable, ICommon {
         try {
             sendRemoveGruntMsg();
         } catch (InterruptedException ex) {
-            ErrorHelper.outputToLogAndMsg(null, log,
+            ErrorHelper.outputToLogMsgAndKill(null, log,
                         "fatal error. exiting.", ex);
                 System.exit(-1);
         } catch (MasterFrozenException mfe) {
-            ErrorHelper.outputToLogAndMsg(null, log,
+            ErrorHelper.outputToLogMsgAndKill(null, log,
                         "fatal error. exiting.", mfe);
                 System.exit(-1);
         }
@@ -350,7 +350,7 @@ public class Broker implements Runnable, ICommon {
             MasterIOHelper.receiveOutputFileFromGrunt(bSSock, t, lokiBaseDir);
             lastTaskTime = t.getTaskTime();
         }
-
+        t.setGruntName(machine.getHostname());
 
         master.deliverMessage(reportMsg);
     }

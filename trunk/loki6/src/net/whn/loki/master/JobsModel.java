@@ -222,6 +222,10 @@ public class JobsModel extends AbstractTableModel implements ICommon,
         return gruntIDlist;
     }
 
+    long getJobID(int row) {
+        return jobsList.get(row).getJobID();
+    }
+
     /**
      * we're mutating the jobs, which AWT looks at
      * signals AWT
@@ -236,6 +240,13 @@ public class JobsModel extends AbstractTableModel implements ICommon,
             jobsList.get(jIndex).setTaskStatus(taskID, status);
             fireTableRowsUpdated(jIndex, jIndex); //tell AWT.EventQueue
         }
+    }
+
+    void resetFailures(int[] rows) {
+        for(int i = 0; i<rows.length; i++) {
+            jobsList.get(i).resetFailures();
+        }
+        fireTableDataChanged();
     }
 
     /**
@@ -256,7 +267,8 @@ public class JobsModel extends AbstractTableModel implements ICommon,
             status = j.setReturnTask(r);
             fireTableRowsUpdated(jIndex, jIndex); //tell AWT.EventQueue
 
-            if (t.isTile() && AreFrameTilesDone(j, t.getFrame())) {
+            if (t.getStatus() == TaskStatus.DONE && t.isTile() &&
+                    AreFrameTilesDone(j, t.getFrame())) {
                 return true;
             }
         }
