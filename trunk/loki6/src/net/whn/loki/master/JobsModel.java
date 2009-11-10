@@ -244,7 +244,7 @@ public class JobsModel extends AbstractTableModel implements ICommon,
 
     void resetFailures(int[] rows) {
         for(int i = 0; i<rows.length; i++) {
-            jobsList.get(i).resetFailures();
+            jobsList.get(rows[i]).resetFailures();
         }
         fireTableDataChanged();
     }
