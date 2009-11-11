@@ -205,7 +205,7 @@ public class Task implements ICommon, Serializable, Cloneable {
 
         taskTime = CLHelper.extractBlenderRenderTime(stdout);
         File outputFile = new File(
-                CLHelper.getBlenderRenderedFileName(stdout));
+                CLHelper.blender_getRenderedFileName(stdout));
         outputFileName = outputFile.getName();
         outputFileExt = outputFileName.substring(
                 outputFileName.lastIndexOf('.') + 1, outputFileName.length());

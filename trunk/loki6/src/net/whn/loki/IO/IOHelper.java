@@ -176,14 +176,20 @@ public class IOHelper {
         return total;
     }
 
+    /**
+     *
+     * @param lokiCfgDir
+     * @return false if .runningLock file didn't exist, false otherwise
+     * @throws IOException
+     */
     public static boolean setupRunningLock(File lokiCfgDir) throws IOException {
         File runningLock = new File(lokiCfgDir, ".runningLock");
 
         if (runningLock.createNewFile()) {
             runningLock.deleteOnExit();
-            return true;
+            return false;
         } else {
-            return false;   //oops; loki is already running on this system
+            return true;   //oops; loki is already running on this system
         }
     }
 

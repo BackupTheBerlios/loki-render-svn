@@ -37,6 +37,7 @@ public class MasterEQCaller extends EQCallerA {
     public static void invokeStop(final MasterForm mForm) {
         EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 mForm.stopQueue();
             }
@@ -52,6 +53,7 @@ public class MasterEQCaller extends EQCallerA {
             final int cores) {
         EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 mForm.updateCores(cores);
             }
@@ -62,6 +64,7 @@ public class MasterEQCaller extends EQCallerA {
             final GruntDetails details) {
         EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 mForm.viewGruntDetails(details);
             }
@@ -72,6 +75,7 @@ public class MasterEQCaller extends EQCallerA {
             final Job job) {
         EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 mForm.viewJobDetails(job);
             }
@@ -134,6 +138,7 @@ public class MasterEQCaller extends EQCallerA {
             update = u;
         }
 
+        @Override
         public void run() {
             mForm.updateProgressBar(update);
         }

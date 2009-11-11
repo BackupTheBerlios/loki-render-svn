@@ -44,13 +44,27 @@ public class Main {
         defaultHandler = new DefaultExceptionHandler(lokiForm);
         Thread.setDefaultUncaughtExceptionHandler(defaultHandler);
 
-        //is loki already running?
         try {
-            if (!IOHelper.setupRunningLock(lokiCfgDir)) {
-                JOptionPane.showMessageDialog(lokiForm,
-                        "Loki Render is already running on this computer.");
-            } else {
+            boolean launch = true;
 
+            if (IOHelper.setupRunningLock(lokiCfgDir)) {
+                Object[] options = {"Start", "Quit"};
+                int result = JOptionPane.showOptionDialog(
+                        lokiForm,
+                        alreadyRunningText,
+                        "Already running, or improper shutdown",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE,
+                        null,
+                        options,
+                        options[0]);
+
+                if (result != 0) {
+                    launch = false;
+                }
+            }
+            
+            if (launch) {
                 if (lokiCfgDir == null) {
                     showMsg(lokiForm,
                             "Please give Loki read/write permissions to the\n" +
@@ -88,6 +102,9 @@ public class Main {
     private static LokiRole myRole;
     private static int masterMessageQueueSize = 100;
     private static Config cfg = null;
+    private static String alreadyRunningText =
+            "Loki is already running, or wasn't properly shutdown.\n" +
+            "If Loki isn't running, you can safely select 'Start'";
     //master
     private static MasterR master;
     private static Thread masterThread;

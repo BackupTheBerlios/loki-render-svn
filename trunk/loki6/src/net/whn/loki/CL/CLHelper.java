@@ -80,14 +80,15 @@ public class CLHelper implements ICommon {
      * @param stdout
      * @return full path
      */
-    public static String getBlenderRenderedFileName(String stdout) {
-        String[] tokens = stdout.split(" |\\n");
+    public static String blender_getRenderedFileName(String stdout) {
+        //example "Saved: /home/daniel/.loki/tmp/0001.png Time: 00:00.31"
+        String[] tokens = stdout.split("\\n");
         for (int i = 0; i < tokens.length; i++) {
             if (tokens[i].contains("Saved:")) {
-                return tokens[i + 1];
+                int last = tokens[i].lastIndexOf("Time:") - 1;
+                return tokens[i].substring(7, last);
             }
         }
-
         return null;
     }
 
