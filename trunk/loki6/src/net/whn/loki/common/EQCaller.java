@@ -30,9 +30,9 @@ import javax.swing.JOptionPane;
  *
  * @author daniel
  */
-public abstract class EQCallerA implements ICommon {
+public class EQCaller implements ICommon {
 
-    public EQCallerA() {
+    public EQCaller() {
     }
 
     /**

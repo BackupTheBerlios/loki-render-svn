@@ -4,7 +4,6 @@
  *Copyright (C) 2009 Daniel Petersen
  *Created on Oct 30, 2009
  */
-
 /**
  *This program is free software: you can redistribute it and/or modify
  *it under the terms of the GNU General Public License as published by
@@ -19,7 +18,6 @@
  *You should have received a copy of the GNU General Public License
  *along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.whn.loki.error;
 
 import java.util.logging.Logger;
@@ -32,14 +30,23 @@ import net.whn.loki.common.LokiForm;
  */
 public class ErrorHelper {
 
-    public static void outputToLogMsgAndKill(LokiForm form, Logger log,
-            String text, Throwable t) {
-        log.severe(text + t.toString() + "\n" + t.getMessage());
-        JOptionPane.showMessageDialog(form,
-                text + t.toString() + "\n" + t.getMessage(),
-                "Fatal Error",
-                JOptionPane.ERROR_MESSAGE);
-
+    /**
+     * null lokiform is ok here; can handle it.
+     * @param form
+     * @param log
+     * @param text
+     * @param t
+     */
+    public static void outputToLogMsgAndKill(LokiForm form, boolean gruntcl, 
+            Logger log, String text, Throwable t) {
+        String msg = text + t.toString() + "\n" + t.getMessage();
+        log.severe(msg);
+        if(!gruntcl) {
+            JOptionPane.showMessageDialog(form,
+                    msg, "Fatal Error",
+                    JOptionPane.ERROR_MESSAGE);
+        } else
+            System.out.println(msg);
         System.exit(-1);
     }
 }

@@ -28,7 +28,7 @@ import javax.swing.JOptionPane;
  *
  * @author daniel
  */
-public class MasterEQCaller extends EQCallerA {
+public class MasterEQCaller extends EQCaller {
 
     /**
      * tell UI we're stopping the queue

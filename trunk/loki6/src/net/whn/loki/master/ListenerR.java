@@ -54,7 +54,7 @@ public class ListenerR implements Runnable, ICommon {
                     //don't do anything. we just wanted to get
                     //unblocked so we can periodically check the interrupt
                 } catch (MasterFrozenException mfe) {
-                    ErrorHelper.outputToLogMsgAndKill(null, log,
+                    ErrorHelper.outputToLogMsgAndKill(null, false, log,
                             "fatal error. exiting.", mfe.getCause());
                 }
             } catch (IOException ex) {

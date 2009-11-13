@@ -77,6 +77,7 @@ public class GruntR implements Runnable, ICommon {
         //grunt specific
 
         //null values for start
+        gruntForm = null;
         masterLokiVer = null;
         masterName = null;
         masterAddress = null;
@@ -104,8 +105,13 @@ public class GruntR implements Runnable, ICommon {
                     machineUpdateHandler =
                             Executors.newSingleThreadScheduledExecutor();
 
-                    GruntEQCaller.invokeUpdateConnectionLbl(gruntForm,
-                            "online with master '" + masterName + "'");
+                    String msg = "online with master '" + masterName + "'";
+                    if (gruntForm != null) {
+                        GruntEQCaller.invokeUpdateConnectionLbl(gruntForm,
+                                msg);
+                    } else {
+                        System.out.println(msg);
+                    }
 
                     final MachineUpdateR muR = new MachineUpdateR(
                             gruntStreamSock);
@@ -156,8 +162,13 @@ public class GruntR implements Runnable, ICommon {
                         gruntStreamSock.tryClose();
                     }
                 }
-                GruntEQCaller.invokeUpdateConnectionLbl(gruntForm,
-                        "searching for master...");
+                String msg = "searching for master...";
+                if (gruntForm != null) {
+                    GruntEQCaller.invokeUpdateConnectionLbl(gruntForm, msg);
+                } else {
+                    System.out.print(msg);
+                }
+
 
             } else {  //findmaster() failed: IOE or user signalled quit
                 localShutdown = true;   //either case is shutdown
@@ -168,6 +179,7 @@ public class GruntR implements Runnable, ICommon {
 
     public void setGruntForm(GruntForm gForm) {
         gruntForm = gForm;
+        gruntcl = true;
     }
 
     public Config getCfg() {
@@ -200,7 +212,9 @@ public class GruntR implements Runnable, ICommon {
                 //nothing to do here..continue
             }
             signalShutdown();
-            gruntForm.exitNoQuery();
+            if (gruntForm != null) {
+                gruntForm.exitNoQuery();
+            }
         }
     }
 
@@ -219,7 +233,7 @@ public class GruntR implements Runnable, ICommon {
 
     void handleFatalException(Exception ex) {
         //TODO - any general stuff in here?
-        ErrorHelper.outputToLogMsgAndKill(gruntForm, log,
+        ErrorHelper.outputToLogMsgAndKill(gruntForm, gruntcl, log,
                 "Fatal error. Click ok to exit.", ex);
 
         shutdown();
@@ -239,7 +253,9 @@ public class GruntR implements Runnable, ICommon {
             gruntStreamSock.tryClose();
         }
         log.finest("signalShutdown()");
-        gruntForm.dispose();
+        if (gruntForm != null) {
+            gruntForm.dispose();
+        }
     }
 
     /*BEGIN PRIVATE*/
@@ -255,6 +271,7 @@ public class GruntR implements Runnable, ICommon {
     private static String masterLokiVer;  //TODO - use this. (version check)
     private String masterName;
     private static GruntForm gruntForm;
+    private static boolean gruntcl = false;
     private static GruntStatus status;
     private static volatile boolean localShutdown;
     private final ExecutorService taskHandler;
@@ -334,10 +351,16 @@ public class GruntR implements Runnable, ICommon {
                 IOHelper.deleteRunningLock(lokiCfgDir);
             }
         } catch (IOException ex) {
-            MasterEQCaller.showMessageDialog(gruntForm, "Error",
-                    "failed to write " +
-                    "to loki.cfg.  Check filesystem permissions.",
-                    JOptionPane.WARNING_MESSAGE);
+            String msg = "failed to write " +
+                    "to loki.cfg.  Check filesystem permissions.";
+
+            if (gruntForm != null) {
+                MasterEQCaller.showMessageDialog(gruntForm, "Error",
+                        msg, JOptionPane.WARNING_MESSAGE);
+            } else {
+                System.out.println(msg);
+            }
+
             log.warning("failed to write cfg to file:" + ex.getMessage());
         }
     }
@@ -358,8 +381,8 @@ public class GruntR implements Runnable, ICommon {
         }
         previousMD5Request = null;
 
-        GruntEQCaller.invokeUpdateStatus(gruntForm,
-                new GruntStatusText(GruntTxtStatus.FETCH, size));
+        updateStatus(GruntTxtStatus.FETCH, size);
+
         try {
             if (GruntIOHelper.receiveFileFromBroker(gruntForm, cfg.getFileCacheMap(),
                     gruntStreamSock, lokiCacheDir, size, h.getMD5(), cfg)) {
@@ -459,6 +482,25 @@ public class GruntR implements Runnable, ICommon {
         }
     }
 
+    private void updateStatus(GruntTxtStatus currentStatus) {
+        if (gruntForm != null) {
+            GruntEQCaller.invokeUpdateStatus(gruntForm,
+                    new GruntStatusText(currentStatus));
+        } else {
+            System.out.println(currentStatus.toString());
+        }
+    }
+
+    private void updateStatus(GruntTxtStatus currentStatus, long val) {
+        if (gruntForm != null) {
+            GruntEQCaller.invokeUpdateStatus(gruntForm,
+                    new GruntStatusText(currentStatus, val));
+        } else {
+            System.out.println(currentStatus.toString() + " (bytes) :" +
+                    Long.toString(val));
+        }
+    }
+
     /**
      * private inner class that handles a given assigned task
      */
@@ -514,8 +556,8 @@ public class GruntR implements Runnable, ICommon {
                             sendHdr(new Hdr(HdrType.IDLE));
                         }
                     } else {
-                        GruntEQCaller.invokeUpdateStatus(gruntForm,
-                                new GruntStatusText(GruntTxtStatus.PENDING_SEND));
+                        updateStatus(GruntTxtStatus.PENDING_SEND);
+
                         log.fine("socket closed! will try and send next connect");
                     }
                 }
@@ -544,15 +586,14 @@ public class GruntR implements Runnable, ICommon {
                     log.severe("failed file IO task: " + ex.getMessage());
                     //TODO - handle this somehow
                 }
-                GruntEQCaller.invokeUpdateStatus(gruntForm,
-                        new GruntStatusText(GruntTxtStatus.IDLE));
+                updateStatus(GruntTxtStatus.IDLE);
+
             } else if (task.getStatus() == TaskStatus.LOCAL_ABORT) {
                 //nothing to do here...
             } else if (task.getStatus() == TaskStatus.MASTER_ABORT) {
                 //nothing to do here...
             } else if (task.getStatus() == TaskStatus.FAILED) {
-                GruntEQCaller.invokeUpdateStatus(gruntForm,
-                        new GruntStatusText(GruntTxtStatus.ERROR));
+                updateStatus(GruntTxtStatus.ERROR);
                 log.warning("task failed with output: " + task.getStdout() +
                         "\n" + task.getErrOut());
             } else {
@@ -565,15 +606,14 @@ public class GruntR implements Runnable, ICommon {
             String result[] = {"", ""};
             ProcessHelper processHelper = new ProcessHelper(taskCL);
 
-            GruntEQCaller.invokeUpdateStatus(gruntForm,
-                    new GruntStatusText(GruntTxtStatus.BUSY));
+            updateStatus(GruntTxtStatus.BUSY);
 
             //block here until process returns
             result = processHelper.runProcess();
 
             if (result[1].contains("IOException")) {
-                GruntEQCaller.invokeUpdateStatus(gruntForm,
-                        new GruntStatusText(GruntTxtStatus.ERROR));
+                updateStatus(GruntTxtStatus.ERROR);
+
                 if (result[1].contains("No such file or directory")) {
                     //task executable wasn't found
                     result[0] = "task executable not found (e.g. blender)!";
@@ -582,8 +622,8 @@ public class GruntR implements Runnable, ICommon {
 
                 }
             } else if (result[1].contains("InterruptedException")) {
-                GruntEQCaller.invokeUpdateStatus(gruntForm,
-                        new GruntStatusText(GruntTxtStatus.ABORT));
+                updateStatus(GruntTxtStatus.ABORT);
+
                 if (task.getStatus() == TaskStatus.MASTER_ABORT) {
                     result[0] = "master aborted task";
                     log.info("task aborted by master");
@@ -594,8 +634,7 @@ public class GruntR implements Runnable, ICommon {
 
                 }
             } else if (result[1].contains("ExecutionException")) {
-                GruntEQCaller.invokeUpdateStatus(gruntForm,
-                        new GruntStatusText(GruntTxtStatus.ABORT));
+                updateStatus(GruntTxtStatus.ABORT);
             }
             return result;
         }
@@ -604,9 +643,7 @@ public class GruntR implements Runnable, ICommon {
             try {
                 File tmpOutFile = new File(lokiTmpDir,
                         task.getOutputFileName());
-                GruntEQCaller.invokeUpdateStatus(gruntForm,
-                        new GruntStatusText(GruntTxtStatus.SEND,
-                        tmpOutFile.length()));
+                updateStatus(GruntTxtStatus.SEND, tmpOutFile.length());
                 GruntIOHelper.sendOutputFileToBroker(gruntForm,
                         tmpOutFile, gruntStreamSock);
 
@@ -616,8 +653,7 @@ public class GruntR implements Runnable, ICommon {
                 log.throwing(masterName, "run()", ex);
                 //TODO have no idea how to handle this right now...
             }
-            GruntEQCaller.invokeUpdateStatus(gruntForm,
-                    new GruntStatusText(GruntTxtStatus.IDLE));
+            updateStatus(GruntTxtStatus.IDLE);
         }
 
         /**

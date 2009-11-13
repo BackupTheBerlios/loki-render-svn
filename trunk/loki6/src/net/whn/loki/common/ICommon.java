@@ -21,7 +21,7 @@ package net.whn.loki.common;
  */
 public interface ICommon {
 
-    enum LokiRole { GRUNT, MASTER, MASTER_GRUNT, ASK };
+    enum LokiRole { GRUNT, GRUNTCL, MASTER, MASTER_GRUNT, ASK };
 
     /**
      *A - remaining, stopped

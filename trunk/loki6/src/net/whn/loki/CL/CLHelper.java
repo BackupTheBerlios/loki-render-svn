@@ -105,6 +105,8 @@ public class CLHelper implements ICommon {
 
     public static boolean determineBlenderBin(Config cfg)
              {
+        boolean exeOK = true;
+
         String blenderBinStr = cfg.getBlenderBin();
         if (blenderBinStr == null) {
             blenderBinStr = "blender";
@@ -121,13 +123,16 @@ public class CLHelper implements ICommon {
                     if (isBlenderExe(blenderBinStr)) {
                         break;
                     } else {
-                        String msg = "'" + blenderBinStr +
-                                "' is not a valid Blender \n" + "executable.";
-                        JOptionPane.showMessageDialog(null, msg, "Notice",
-                                JOptionPane.WARNING_MESSAGE);
+                        String msg = "Loki can't validate\n'" +
+                                blenderBinStr + "'\n" +
+                                "as a Blender executable. Use it anyway?";
+                        int result = JOptionPane.showConfirmDialog(null, msg,
+                                "Valid executable?", JOptionPane.YES_NO_OPTION);
 
-                        log.info("not a valid blender executable: " +
+                        log.info("can't validate blender executable: " +
                                 blenderBinStr);
+                        if(result == 0)
+                            break;
                     }
                 } else {
                     log.info("loki didn't get a blender exe path; exiting.");
@@ -136,7 +141,7 @@ public class CLHelper implements ICommon {
             }
         }
         cfg.setBlenderBin(blenderBinStr);
-        return true;
+        return exeOK;
     }
 
     public static boolean isBlenderExe(String blenderBinStr)

@@ -124,7 +124,7 @@ public class MasterForm extends LokiForm implements ICommon {
         } catch (InterruptedException IntEx) {
             log.severe("interrupted exception: " + IntEx.toString());
         } catch (MasterFrozenException mfe) {
-            ErrorHelper.outputToLogMsgAndKill(this, log,
+            ErrorHelper.outputToLogMsgAndKill(this, false, log,
                     "fatal error. click ok to exit.", mfe.getCause());
             System.exit(-1);
         }
@@ -134,7 +134,6 @@ public class MasterForm extends LokiForm implements ICommon {
     //logging
     private static final String className = "net.whn.loki.master.MasterForm";
     private static final Logger log = Logger.getLogger(className);
-
     private final MasterR manager;
     private final JobsModel jobsModel;
     private final BrokersModel brokersModel;
@@ -450,11 +449,11 @@ public class MasterForm extends LokiForm implements ICommon {
                 manager.deliverMessage(new Msg(MsgType.START_QUEUE));
                 btnStart.setText("Stop");
             } catch (InterruptedException ex) {
-                ErrorHelper.outputToLogMsgAndKill(this, log,
-                    "fatal error. click ok to exit.", ex);
+                ErrorHelper.outputToLogMsgAndKill(this, false, log,
+                        "fatal error. click ok to exit.", ex);
             } catch (MasterFrozenException mfe) {
-                ErrorHelper.outputToLogMsgAndKill(this, log,
-                    "fatal error. click ok to exit.", mfe.getCause());
+                ErrorHelper.outputToLogMsgAndKill(this, false, log,
+                        "fatal error. click ok to exit.", mfe.getCause());
                 System.exit(-1);
             }
         } else {  //stop the queue
@@ -557,11 +556,11 @@ public class MasterForm extends LokiForm implements ICommon {
     private void resetFailures() {
         int[] rows = jobsTable.getSelectedRows();
 
-        if(rows.length > 0) {
+        if (rows.length > 0) {
             sendMsg2Manager(new ResetFailuresMsg(MsgType.RESET_FAILURES, rows));
         } else {
-           JOptionPane.showMessageDialog(this,
-                "Please select one or more jobs first.");
+            JOptionPane.showMessageDialog(this,
+                    "Please select one or more jobs first.");
         }
     }
 
@@ -608,9 +607,14 @@ public class MasterForm extends LokiForm implements ICommon {
         }
 
         if (exit) {
-            sendMsg2Manager(new Msg(MsgType.SHUTDOWN));
             prefForm.dispose();
             dispose();
+            sendMsg2Manager(new Msg(MsgType.SHUTDOWN));
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                System.exit(0);
+            }
         }
     }
 
@@ -622,11 +626,11 @@ public class MasterForm extends LokiForm implements ICommon {
         try {
             manager.deliverMessage(m);
         } catch (InterruptedException ex) {
-            ErrorHelper.outputToLogMsgAndKill(this, log,
+            ErrorHelper.outputToLogMsgAndKill(this, false, log,
                     "fatal error. click ok to exit.", ex);
             System.exit(-1);
         } catch (MasterFrozenException mfe) {
-            ErrorHelper.outputToLogMsgAndKill(this, log,
+            ErrorHelper.outputToLogMsgAndKill(this, false, log,
                     "fatal error. click ok to exit.", mfe.getCause());
             System.exit(-1);
         }
@@ -672,6 +676,4 @@ public class MasterForm extends LokiForm implements ICommon {
     private javax.swing.JScrollPane scrollGrunts;
     private javax.swing.JScrollPane scrollJobs;
     // End of variables declaration//GEN-END:variables
-
-
 }

@@ -109,8 +109,10 @@ public class GruntIOHelper extends IOHelper {
                 outFile.write(buffer, 0, amountRead);
                 remaining -= amountRead;
 
-                GruntEQCaller.invokeGruntUpdatePBar(gruntForm,
+                if(gruntForm != null) {
+                    GruntEQCaller.invokeGruntUpdatePBar(gruntForm,
                         new ProgressUpdate(total, remaining));
+                }
             }
 
             md5 = binToHex(digest.digest());
@@ -160,7 +162,11 @@ public class GruntIOHelper extends IOHelper {
                     }
                     gSock.sendFileChunk(buffer, amountRead);
                     remaining -= amountRead;
-                    GruntEQCaller.invokeGruntUpdatePBar(gForm, new ProgressUpdate(total, remaining));
+
+                    if(gForm != null) {
+                        GruntEQCaller.invokeGruntUpdatePBar(gForm,
+                                new ProgressUpdate(total, remaining));
+                    }
                 }
                 gSock.flushSockOut();
             }

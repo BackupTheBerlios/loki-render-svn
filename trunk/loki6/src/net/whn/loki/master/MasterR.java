@@ -33,7 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import net.whn.loki.IO.IOHelper;
-import net.whn.loki.common.EQCallerA;
+import net.whn.loki.common.EQCaller;
 import net.whn.loki.common.ICommon;
 import net.whn.loki.common.Config;
 import net.whn.loki.common.GruntDetails;
@@ -150,7 +150,7 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
                  */
                 break;
             } catch (IOException ex) {
-                ErrorHelper.outputToLogMsgAndKill(masterForm, log,
+                ErrorHelper.outputToLogMsgAndKill(masterForm, false, log,
                     "Loki encountered an error", ex);
             } catch (MasterFrozenException mfe) {
                 //impossible
@@ -261,7 +261,7 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
         FatalThrowableMsg fatalMsg = (FatalThrowableMsg) m;
         Throwable throwable = fatalMsg.getThrowable();
 
-        ErrorHelper.outputToLogMsgAndKill(masterForm, log,
+        ErrorHelper.outputToLogMsgAndKill(masterForm, false, log,
                 "Loki encountered a fatal error.\n" +
                 "Click OK to exit.", throwable);
 
@@ -278,7 +278,7 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
         JobFormInput newJobInput = message.getJobInput();
 
         if (!jobsModel.isJobNameUnique(newJobInput.getName())) {
-            EQCallerA.showMessageDialog(masterForm, "Job name exists",
+            EQCaller.showMessageDialog(masterForm, "Job name exists",
                     "A job with the name '" +
                     newJobInput.getName() +
                     "' already exists. Please use a unique name.",
@@ -291,7 +291,7 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
             long size = pFile.length();
             if (md5 == null) {
                 //oops, we failed to cacheFile
-                EQCallerA.showMessageDialog(masterForm, "failed to add job",
+                EQCaller.showMessageDialog(masterForm, "failed to add job",
                         "Adding a new job failed. Filesystem permission problem?",
                         JOptionPane.WARNING_MESSAGE);
                 log.severe("unable to add new job.");

@@ -65,18 +65,18 @@ public class Broker implements Runnable, ICommon {
                 } catch (InterruptedException iex) {
                     //nothing to do here
                 } catch (MasterFrozenException mfe) {
-                    ErrorHelper.outputToLogMsgAndKill(null, log,
+                    ErrorHelper.outputToLogMsgAndKill(null, false, log,
                             "fatal error. exiting.", ex);
                 }
                 log.throwing(className, "run()", ex);
                 break;
             } catch (InterruptedException ex) {
-                ErrorHelper.outputToLogMsgAndKill(null, log,
+                ErrorHelper.outputToLogMsgAndKill(null, false, log,
                         "fatal error. exiting.", ex);
                 System.exit(-1);
                 break;
             } catch (MasterFrozenException mfe) {
-                ErrorHelper.outputToLogMsgAndKill(null, log,
+                ErrorHelper.outputToLogMsgAndKill(null, false, log,
                         "fatal error. exiting.", mfe);
                 System.exit(-1);
             }
@@ -85,11 +85,11 @@ public class Broker implements Runnable, ICommon {
         try {
             sendRemoveGruntMsg();
         } catch (InterruptedException ex) {
-            ErrorHelper.outputToLogMsgAndKill(null, log,
+            ErrorHelper.outputToLogMsgAndKill(null, false, log,
                         "fatal error. exiting.", ex);
                 System.exit(-1);
         } catch (MasterFrozenException mfe) {
-            ErrorHelper.outputToLogMsgAndKill(null, log,
+            ErrorHelper.outputToLogMsgAndKill(null, false, log,
                         "fatal error. exiting.", mfe);
                 System.exit(-1);
         }

@@ -34,13 +34,24 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        /**
-         * TODO -command line args here:
-         * -gruntcl
-         */
-        LokiForm lokiForm = new LokiForm();
+        LokiForm lokiForm = null;
+
+        //if null, no arg was found
+        String blenderExe = handleArgs(args);
+
+        if (blenderExe != null) {
+            gruntcl = true;
+        }
+
+
+
         lokiCfgDir = IOHelper.setupLokiCfgDir();
-        setNativeLAF();
+
+        if (!gruntcl) {
+            lokiForm = new LokiForm();
+            setNativeLAF();
+        }
+
         defaultHandler = new DefaultExceptionHandler(lokiForm);
         Thread.setDefaultUncaughtExceptionHandler(defaultHandler);
 
@@ -48,55 +59,84 @@ public class Main {
             boolean launch = true;
 
             if (IOHelper.setupRunningLock(lokiCfgDir)) {
-                Object[] options = {"Start", "Quit"};
-                int result = JOptionPane.showOptionDialog(
-                        lokiForm,
-                        alreadyRunningText,
-                        "Already running, or improper shutdown",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE,
-                        null,
-                        options,
-                        options[0]);
+                int result = -1;
+                if (!gruntcl) {
+                    Object[] options = {"Start", "Quit"};
+                    result = JOptionPane.showOptionDialog(
+                            lokiForm,
+                            alreadyRunningText,
+                            "Already running, or improper shutdown",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE,
+                            null,
+                            options,
+                            options[0]);
+                } else {
+                    System.out.println("Already running or improper shutdown.\n" +
+                            "If Loki was improperly shutdown, you will need\n" +
+                            "to delete the .loki/.runningLock file.");
+                }
+                log.warning("already running, or improper shutdown");
 
                 if (result != 0) {
                     launch = false;
                 }
             }
-            
+
             if (launch) {
                 if (lokiCfgDir == null) {
-                    showMsg(lokiForm,
+                    String writeMsg =
                             "Please give Loki read/write permissions to the\n" +
                             "directory: '" + System.getProperty("user.home") + "'\n" +
-                            "and restart Loki.");
+                            "and restart Loki.";
+                    if (!gruntcl) {
+                        EQCaller.showMessageDialog(lokiForm,
+                                "Loki needs write permissions",
+                                writeMsg, JOptionPane.WARNING_MESSAGE);
+                    } else {
+                        System.out.println(writeMsg);
+                    }
+
                     log.severe("filesystem is not writable. Loki exiting.");
                 } else {  //filesystem is writable so continue
                     setupLogging();
                     try {
                         cfg = Config.readCfgFile(lokiCfgDir);
+                        if (gruntcl) {
+                            cfg.setBlenderBin(blenderExe);
+                        }
                         startLoki(lokiForm);
 
                     } catch (IOException ex) {
                         //fatal error during Announce startup
-                        ErrorHelper.outputToLogMsgAndKill(lokiForm, log,
+                        String errMsg =
                                 "Loki encountered a fatal error.\n" +
-                                "Click OK to exit.", ex);
+                                "Click OK to exit.";
+
+                        ErrorHelper.outputToLogMsgAndKill(lokiForm, gruntcl, 
+                                log, errMsg, ex);
+
                         System.exit(-1);
                     }
                 }
             }
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(lokiForm,
+            String ioMsg =
                     "Loki Render is having IO problems with the filesystem:\n" +
-                    ex.getMessage() +
-                    "\nClick OK to exit.");
+                    ex.getMessage() + "\nClick OK to exit.";
+
+            if (!gruntcl) {
+                JOptionPane.showMessageDialog(lokiForm, ioMsg);
+                lokiForm.dispose();
+            } else {
+                System.out.println(ioMsg);
+            }
         }
-        lokiForm.dispose();
     }
 
     /*BEGIN PRIVATE*/
     //general
+    private static boolean gruntcl = false;
     private static DefaultExceptionHandler defaultHandler;
     private static File lokiCfgDir; //base path for '.lokiconf' dir
     private static LokiRole myRole;
@@ -125,21 +165,26 @@ public class Main {
      */
     private static void startLoki(LokiForm hiddenForm) throws IOException {
 
-        if (cfg.getRole() == LokiRole.ASK) {
-            int role = getRole(hiddenForm);
-            if (role == 0) {
-                myRole = LokiRole.GRUNT;
-            } else if (role == 1) {
-                myRole = LokiRole.MASTER;
-            } else if (role == 2) {
-                myRole = LokiRole.MASTER_GRUNT;
+        if (!gruntcl) {
+            if (cfg.getRole() == LokiRole.ASK) {
+                int role = getRole(hiddenForm);
+                if (role == 0) {
+                    myRole = LokiRole.GRUNT;
+                } else if (role == 1) {
+                    myRole = LokiRole.MASTER;
+                } else if (role == 2) {
+                    myRole = LokiRole.MASTER_GRUNT;
+                } else {
+                    log.fine("quit dialog; exiting.");
+                    System.exit(0);
+                }
             } else {
-                log.fine("quit dialog; exiting.");
-                System.exit(0);
+                myRole = cfg.getRole();
             }
         } else {
-            myRole = cfg.getRole();
+            myRole = LokiRole.GRUNTCL;
         }
+
 
 
         if (myRole == LokiRole.GRUNT || myRole == LokiRole.MASTER_GRUNT) {
@@ -148,7 +193,7 @@ public class Main {
             }
         }
 
-        if (myRole == LokiRole.GRUNT) {
+        if (myRole == LokiRole.GRUNT || myRole == LokiRole.GRUNTCL) {
             startGrunt(null, null);
         } else if (myRole == LokiRole.MASTER) {
             startMaster(hiddenForm, false);
@@ -225,26 +270,19 @@ public class Main {
         grunt = new GruntR(master, lokiCfgDir, cfg);
         gruntReceiverThread = new Thread(grunt, "grunt");
 
-        gruntForm = new GruntForm(grunt);
-        grunt.setGruntForm(gruntForm);
-        if (myPoint == null) {
-            gruntForm.setLocationRelativeTo(null);
-        } else {
-            gruntForm.setLocation(myPoint);
-        }
+        if (!gruntcl) {
+            gruntForm = new GruntForm(grunt);
+            grunt.setGruntForm(gruntForm);
 
-        gruntReceiverThread.start();
-        gruntForm.setVisible(true);
-    }
-
-    private static void showMsg(final LokiForm hiddenForm, final String msg) {
-        EventQueue.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                JOptionPane.showMessageDialog(hiddenForm, msg);
+            if (myPoint == null) {
+                gruntForm.setLocationRelativeTo(null);
+            } else {
+                gruntForm.setLocation(myPoint);
             }
-        });
+
+            gruntForm.setVisible(true);
+        }
+        gruntReceiverThread.start();
     }
 
     private static void setupLogging() {
@@ -294,5 +332,27 @@ public class Main {
             //log.setLevel(Level.ALL);
 
         }
+    }
+
+    private static String handleArgs(String[] args) {
+        String blenderExe = null;
+        if (args.length == 1) {
+            if (CLHelper.isBlenderExe(args[0])) {
+                blenderExe = args[0];
+            } else {
+                log.info("invalid blender executable");
+                System.exit(1);
+            }
+
+        } else if (args.length > 1) {
+            System.out.print("Usage:    launchLoki.sh [<blenderExecutable>]\n" +
+                    "Examples: ./launchLoki.sh\n" +
+                    "or        /home/joe/loki/launchLoki.sh " +
+                    "/home/joe/blender2.49/blender\n\n" +
+                    "Loki will start in grunt command line mode (no GUI) if\n" +
+                    "a blender executable is provided as an argument.\n\n");
+            System.exit(0);
+        }
+        return blenderExe;
     }
 }

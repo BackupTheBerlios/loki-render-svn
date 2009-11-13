@@ -29,7 +29,7 @@ import java.awt.EventQueue;
  *
  * @author daniel
  */
-public class GruntEQCaller extends EQCallerA {
+public class GruntEQCaller extends EQCaller {
     
     /**
      * updates the connection label on gruntForm
@@ -41,6 +41,7 @@ public class GruntEQCaller extends EQCallerA {
 
         EventQueue.invokeLater(new Runnable()
         {
+            @Override
             public void run()
             {
                 gForm.setLblConnection(text);
@@ -58,6 +59,7 @@ public class GruntEQCaller extends EQCallerA {
 
         EventQueue.invokeLater(new Runnable()
         {
+            @Override
             public void run()
             {
                 gForm.setStatus(s);
