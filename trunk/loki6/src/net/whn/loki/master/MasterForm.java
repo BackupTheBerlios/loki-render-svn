@@ -1,6 +1,6 @@
 /**
  *Project: Loki Render - A distributed job queue manager.
- *Version 0.6.0
+ *Version 0.6.2
  *Copyright (C) 2009 Daniel Petersen
  *Created on Aug 8, 2009, 8:09:39 PM
  */
@@ -38,7 +38,7 @@ import net.whn.loki.common.PreferencesForm;
 import net.whn.loki.error.ErrorHelper;
 import net.whn.loki.messaging.Msg;
 import net.whn.loki.messaging.ResetFailuresMsg;
-import net.whn.loki.messaging.ViewMsg;
+import net.whn.loki.messaging.SelectedGruntMsg;
 
 /**
  *The main UI for the MasterR role of Loki. Jobs and grunts are managed
@@ -154,8 +154,10 @@ public class MasterForm extends LokiForm implements ICommon {
         pmiRemoveJob = new javax.swing.JMenuItem();
         pmiResetFailures = new javax.swing.JMenuItem();
         pmiAbortAll = new javax.swing.JMenuItem();
-        pmenuGruntTable = new javax.swing.JPopupMenu();
+        pmenuGruntOptions = new javax.swing.JPopupMenu();
         pmiViewGrunt = new javax.swing.JMenuItem();
+        pmiQuitGrunt = new javax.swing.JMenuItem();
+        pmiQuitAllGrunts = new javax.swing.JMenuItem();
         pmenuNewJob = new javax.swing.JPopupMenu();
         pmiNewJob = new javax.swing.JMenuItem();
         scrollJobs = new javax.swing.JScrollPane();
@@ -220,7 +222,23 @@ public class MasterForm extends LokiForm implements ICommon {
                 pmiViewGruntActionPerformed(evt);
             }
         });
-        pmenuGruntTable.add(pmiViewGrunt);
+        pmenuGruntOptions.add(pmiViewGrunt);
+
+        pmiQuitGrunt.setText("Quit after task (quit now if idle)");
+        pmiQuitGrunt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pmiQuitGruntActionPerformed(evt);
+            }
+        });
+        pmenuGruntOptions.add(pmiQuitGrunt);
+
+        pmiQuitAllGrunts.setText("Quit all grunts after tasks (quit now if idle)");
+        pmiQuitAllGrunts.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pmiQuitAllGruntsActionPerformed(evt);
+            }
+        });
+        pmenuGruntOptions.add(pmiQuitAllGrunts);
 
         pmiNewJob.setText("New Job");
         pmiNewJob.addActionListener(new java.awt.event.ActionListener() {
@@ -508,6 +526,14 @@ public class MasterForm extends LokiForm implements ICommon {
         resetFailures();
     }//GEN-LAST:event_miResetFailuresActionPerformed
 
+    private void pmiQuitGruntActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pmiQuitGruntActionPerformed
+        quitGrunt();
+    }//GEN-LAST:event_pmiQuitGruntActionPerformed
+
+    private void pmiQuitAllGruntsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pmiQuitAllGruntsActionPerformed
+        quitAllGrunts();
+    }//GEN-LAST:event_pmiQuitAllGruntsActionPerformed
+
     private void setupColumnHeaderTooltips() {
         //TODO
     }
@@ -533,20 +559,37 @@ public class MasterForm extends LokiForm implements ICommon {
 
     }
 
+    private void quitGrunt() {
+        int selectedGrunt = gruntsTable.getSelectedRow();
+        if (selectedGrunt != -1) {
+            sendMsg2Manager(new SelectedGruntMsg(
+                    MsgType.QUIT_GRUNT, selectedGrunt));
+        } else {
+            JOptionPane.showMessageDialog(this,
+                    "Please select a grunt first.");
+        }
+    }
+
+    private void quitAllGrunts() {
+        sendMsg2Manager(new Msg(
+                MsgType.QUIT_ALL_GRUNTS));
+    }
+
     private void viewGrunt() {
         int selectedGrunt = gruntsTable.getSelectedRow();
         if (selectedGrunt != -1) {
-            sendMsg2Manager(new ViewMsg(MsgType.VIEW_GRUNT, selectedGrunt));
+            sendMsg2Manager(new SelectedGruntMsg(
+                    MsgType.VIEW_GRUNT, selectedGrunt));
         } else {
             JOptionPane.showMessageDialog(this,
-                    "Please select a grunt, then select 'View Grunt Details'.");
+                    "Please select a grunt first.");
         }
     }
 
     private void viewJob() {
         int selectedJob = jobsTable.getSelectedRow();
         if (selectedJob != -1) {
-            sendMsg2Manager(new ViewMsg(MsgType.VIEW_JOB, selectedJob));
+            sendMsg2Manager(new SelectedGruntMsg(MsgType.VIEW_JOB, selectedJob));
         } else {
             JOptionPane.showMessageDialog(this,
                     "Please select a job, then select 'View Job Details'.");
@@ -639,7 +682,7 @@ public class MasterForm extends LokiForm implements ICommon {
     private void setupTables() {
         scrollJobs.setComponentPopupMenu(pmenuNewJob);
         jobsTable.setComponentPopupMenu(pmenuJobOptions);
-        gruntsTable.setComponentPopupMenu(pmenuGruntTable);
+        gruntsTable.setComponentPopupMenu(pmenuGruntOptions);
         gruntsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -663,11 +706,13 @@ public class MasterForm extends LokiForm implements ICommon {
     private javax.swing.JMenuItem miResetFailures;
     private javax.swing.JMenuItem miViewGrunt;
     private javax.swing.JMenuItem miViewJob;
-    private javax.swing.JPopupMenu pmenuGruntTable;
+    private javax.swing.JPopupMenu pmenuGruntOptions;
     private javax.swing.JPopupMenu pmenuJobOptions;
     private javax.swing.JPopupMenu pmenuNewJob;
     private javax.swing.JMenuItem pmiAbortAll;
     private javax.swing.JMenuItem pmiNewJob;
+    private javax.swing.JMenuItem pmiQuitAllGrunts;
+    private javax.swing.JMenuItem pmiQuitGrunt;
     private javax.swing.JMenuItem pmiRemoveJob;
     private javax.swing.JMenuItem pmiResetFailures;
     private javax.swing.JMenuItem pmiViewGrunt;

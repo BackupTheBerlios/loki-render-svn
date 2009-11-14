@@ -1,6 +1,6 @@
 /**
  *Project: Loki Render - A distributed job queue manager.
- *Version 0.6.0
+ *Version 0.6.2
  *Copyright (C) 2009 Daniel Petersen
  *Created on Aug 17, 2009
  */
@@ -174,7 +174,7 @@ public class GruntR implements Runnable, ICommon {
                 localShutdown = true;   //either case is shutdown
             }
         } while (!localShutdown);
-        shutdown();
+        shutdown(false);
     }
 
     public void setGruntForm(GruntForm gForm) {
@@ -236,7 +236,7 @@ public class GruntR implements Runnable, ICommon {
         ErrorHelper.outputToLogMsgAndKill(gruntForm, gruntcl, log,
                 "Fatal error. Click ok to exit.", ex);
 
-        shutdown();
+        shutdown(false);
     }
 
     /**
@@ -253,9 +253,6 @@ public class GruntR implements Runnable, ICommon {
             gruntStreamSock.tryClose();
         }
         log.finest("signalShutdown()");
-        if (gruntForm != null) {
-            gruntForm.dispose();
-        }
     }
 
     /*BEGIN PRIVATE*/
@@ -316,6 +313,12 @@ public class GruntR implements Runnable, ICommon {
             taskHandler.submit(runningTask);
         } else if (h.getType() == HdrType.TASK_ABORT) {
             abortCurrentTask(TaskStatus.MASTER_ABORT);
+        } else if (h.getType() == HdrType.QUIT_AFTER_TASK) {
+            if(task == null) {
+                shutdown(false);
+            } else {
+                shutdown(true);
+            }
         } else {
             log.severe("handleDelivery received an unknown Hdr type: " +
                     h.getType());
@@ -323,7 +326,7 @@ public class GruntR implements Runnable, ICommon {
         return false;
     }
 
-    private void shutdown() {
+    private void shutdown(boolean patient) {
         log.finest("entering shutdown -->");
         //TODO - query user if busy w/ task
 
@@ -338,8 +341,16 @@ public class GruntR implements Runnable, ICommon {
             machineUpdateHandler.shutdownNow();
         }
         try {
-            taskHandler.awaitTermination(1, TimeUnit.SECONDS);
+            if(patient) {
+                while(!taskHandler.isTerminated()) {
+                  //patiently waiting...
+                }
+            } else {
+                taskHandler.awaitTermination(1, TimeUnit.SECONDS);
+            }
+            
             taskHandler.shutdownNow();
+            signalShutdown();
         } catch (InterruptedException ex) {
             //we're shutting down, so nothing to do here
             log.finest("grunt interrupted during shutdown - weird");
@@ -362,6 +373,19 @@ public class GruntR implements Runnable, ICommon {
             }
 
             log.warning("failed to write cfg to file:" + ex.getMessage());
+        }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            //squelch
+        }
+
+        if (gruntForm != null) {
+            gruntForm.dispose();
+        }
+
+        if(master == null) {
+            System.exit(0);
         }
     }
 
@@ -563,6 +587,7 @@ public class GruntR implements Runnable, ICommon {
                 }
             }
             status = GruntStatus.IDLE;
+
             return "done";
         }
 

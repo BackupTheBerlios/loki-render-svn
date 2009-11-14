@@ -1,6 +1,6 @@
 /**
  *Project: Loki Render - A distributed job queue manager.
- *Version 0.6.0
+ *Version 0.6.2
  *Copyright (C) 2009 Daniel Petersen
  *Created on Sep 3, 2009
  */
@@ -57,7 +57,7 @@ public class Config implements Serializable, ICommon {
         log.setLevel(Level.FINE);
 
         //common
-        lokiVer = "0.6.0";
+        lokiVer = "0.6.2";
         role = LokiRole.ASK;
         lokiCfgDir = lcDir;
         fileCacheMap = new ConcurrentHashMap<String, ProjFile>();

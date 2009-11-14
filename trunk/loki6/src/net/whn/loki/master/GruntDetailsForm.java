@@ -18,7 +18,6 @@
  *
  * Created on Oct 13, 2009, 10:37:28 PM
  */
-
 package net.whn.loki.master;
 
 import java.text.DecimalFormat;
@@ -34,27 +33,27 @@ public class GruntDetailsForm extends LokiForm {
     /** Creates new form GruntDetailsForm */
     public GruntDetailsForm(GruntDetails d) {
         initComponents();
-        setTitle("Grunt details for '" + d.getHostname() + "'");
-        lblOSName.setText(d.getOsName());
-        lblOSVersion.setText(d.getOsVersion());
-        lblOSArch.setText(d.getOsArchitecture());
-        lblCores.setText(Integer.toString(d.getProcessors()));
-        lblMemory.setText(readableMemory(d.getTotalMemory()) + " GB");
-        lblSwapMemory.setText(readableMemory(d.getTotalSwap()) + " GB");
-        lblUserName.setText(d.getUserName());
-        lblHomeDir.setText(d.getUserHome());
-        lblWorkingDir.setText(d.getCurrentWorkingDir());
+        if (d != null) {
+            setTitle("Grunt details for '" + d.getHostname() + "'");
+            lblOSName.setText(d.getOsName());
+            lblOSVersion.setText(d.getOsVersion());
+            lblOSArch.setText(d.getOsArchitecture());
+            lblCores.setText(Integer.toString(d.getProcessors()));
+            lblMemory.setText(readableMemory(d.getTotalMemory()) + " GB");
+            lblSwapMemory.setText(readableMemory(d.getTotalSwap()) + " GB");
+            lblUserName.setText(d.getUserName());
+            lblHomeDir.setText(d.getUserHome());
+            lblWorkingDir.setText(d.getCurrentWorkingDir());
+        }
     }
 
     /*PRIVATE*/
-
-    private String readableMemory (long memory) {
+    private String readableMemory(long memory) {
         DecimalFormat fmt = new DecimalFormat("#0.00");
         final long bytesPerGB = 1073741824;
-        double result = (double)memory/(double)bytesPerGB;
+        double result = (double) memory / (double) bytesPerGB;
         return fmt.format(result);
     }
-
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -257,7 +256,6 @@ public class GruntDetailsForm extends LokiForm {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
@@ -282,5 +280,4 @@ public class GruntDetailsForm extends LokiForm {
     private javax.swing.JPanel pnlOS;
     private javax.swing.JPanel pnlResources;
     // End of variables declaration//GEN-END:variables
-
 }

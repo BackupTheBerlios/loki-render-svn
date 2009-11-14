@@ -175,8 +175,10 @@ public class AboutForm extends LokiForm {
     */
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
+
+            @Override
             public void run() {
-                new AboutForm("0.6.0").setVisible(true);
+                new AboutForm("0.6.2").setVisible(true);
             }
         });
     }

@@ -1,6 +1,6 @@
 /**
  *Project: Loki Render - A distributed job queue manager.
- *Version 0.6.0
+ *Version 0.6.2
  *Copyright (C) 2009 Daniel Petersen
  *Created on Aug 19, 2009
  */
@@ -79,6 +79,7 @@ public class BrokersModel extends AbstractTableModel implements ICommon {
      * AWT
      * @return
      */
+    @Override
     public int getColumnCount() {
         return columnHeaders.length;
     }
@@ -88,6 +89,7 @@ public class BrokersModel extends AbstractTableModel implements ICommon {
      * AWT
      * @return
      */
+    @Override
     public int getRowCount() {
         return brokersList.size();
     }
@@ -99,8 +101,13 @@ public class BrokersModel extends AbstractTableModel implements ICommon {
      * @param column
      * @return string value
      */
+    @Override
     public Object getValueAt(int row, int column) {
-        return brokersList.get(row).getValue(column);
+        if (row < brokersList.size()) {
+            return brokersList.get(row).getValue(column);
+        } else {
+            return "";
+        }
     }
 
     /**
@@ -204,11 +211,56 @@ public class BrokersModel extends AbstractTableModel implements ICommon {
     }
 
     public String getGruntName(long gID) {
-        return brokersList.get(getBrokerIndex(gID)).getValue(0).toString();
+        String name = "";
+        int brokerRow = getBrokerIndex(gID);
+        if (brokerRow != -1) {
+            name = brokersList.get(brokerRow).getValue(0).toString();
+        }
+        return name;
     }
 
     public GruntDetails getGruntDetails(int row) {
-        return brokersList.get(row).getDetails();
+        GruntDetails details = null;
+        if (row < brokersList.size()) {
+            details = brokersList.get(row).getDetails();
+        }
+        return details;
+    }
+
+    public void quitGrunt(int gruntRow) throws MasterFrozenException {
+        try {
+            brokersList.get(gruntRow).sendQuit();
+            updateBrokerRow(gruntRow, "last");
+        } catch (IOException ex) {
+            log.info("failed on send to grunt");
+            try {
+                master.deliverMessage(new RemoveGruntMsg(
+                        brokersList.get(gruntRow).getGruntID()));
+            } catch (InterruptedException iex) {
+                log.severe("failed to deliver msg to master!"); //TODO
+            }
+        }
+    }
+
+    public void quitAllGrunts() throws MasterFrozenException {
+        synchronized (brokersList) {
+            int row = 0;
+            for (Broker b : brokersList) {
+                try {
+                    b.sendQuit();
+                    updateBrokerRow(b.getGruntID(), "last");
+                } catch (IOException ex) {
+                    log.info("failed on send to grunt");
+                    try {
+                        master.deliverMessage(new RemoveGruntMsg(
+                                b.getGruntID()));
+                    } catch (InterruptedException iex) {
+                        log.severe("failed to deliver msg to master!"); //TODO
+                    }
+                }
+                row++;
+            }
+        }
     }
 
     /**
@@ -254,8 +306,10 @@ public class BrokersModel extends AbstractTableModel implements ICommon {
      */
     void updateBrokerRow(long gID, String newStatus) {
         int row = getBrokerIndex(gID);
-        brokersList.get(row).setStatusStr(newStatus);
-        fireTableRowsUpdated(row, row);
+        if (row != -1) {
+            brokersList.get(row).setStatusStr(newStatus);
+            fireTableRowsUpdated(row, row);
+        }
     }
 
     /*PRIVATE*/
@@ -286,6 +340,8 @@ public class BrokersModel extends AbstractTableModel implements ICommon {
         return -1;
     }
 
+
+
     /**l
      * private inner class that sends file to grunt via the broker socket
      * run: fileSendPool
@@ -297,6 +353,7 @@ public class BrokersModel extends AbstractTableModel implements ICommon {
             gruntIndex = getBrokerIndex(gID);
         }
 
+        @Override
         public void run() {
             if (!fileCacheMap.containsKey(md5)) {
                 log.severe("grunt requested a file I don't have: " +

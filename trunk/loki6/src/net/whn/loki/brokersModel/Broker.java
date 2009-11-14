@@ -1,6 +1,6 @@
 /**
  *Project: Loki Render - A distributed job queue master.
- *Version 0.6.0
+ *Version 0.6.2
  *Copyright (C) 2009 Daniel Petersen
  *Created on Aug 19, 2009
  */
@@ -229,6 +229,11 @@ public class Broker implements Runnable, ICommon {
 
     synchronized void sendTaskAbort() throws IOException {
         Hdr h = new Hdr(HdrType.TASK_ABORT);
+        bSSock.sendHdr(h);
+    }
+
+    synchronized void sendQuit() throws IOException {
+        Hdr h = new Hdr(HdrType.QUIT_AFTER_TASK);
         bSSock.sendHdr(h);
     }
 

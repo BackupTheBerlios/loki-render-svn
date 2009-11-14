@@ -42,7 +42,7 @@
         </MenuItem>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPopupMenu" name="pmenuGruntTable">
+    <Container class="javax.swing.JPopupMenu" name="pmenuGruntOptions">
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout">
         <Property name="useNullLayout" type="boolean" value="true"/>
@@ -54,6 +54,22 @@
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="pmiViewGruntActionPerformed"/>
+          </Events>
+        </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="pmiQuitGrunt">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Quit after task (quit now if idle)"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="pmiQuitGruntActionPerformed"/>
+          </Events>
+        </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="pmiQuitAllGrunts">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Quit all grunts after tasks (quit now if idle)"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="pmiQuitAllGruntsActionPerformed"/>
           </Events>
         </MenuItem>
       </SubComponents>

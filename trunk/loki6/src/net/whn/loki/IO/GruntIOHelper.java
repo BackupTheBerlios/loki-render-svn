@@ -1,6 +1,6 @@
 /**
  *Project: Loki Render - A distributed job queue manager.
- *Version 0.6.0
+ *Version 0.6.2
  *Copyright (C) 2009 Daniel Petersen
  *Created on Oct 27, 2009
  */
@@ -114,6 +114,7 @@ public class GruntIOHelper extends IOHelper {
                         new ProgressUpdate(total, remaining));
                 }
             }
+            outFile.close();
 
             md5 = binToHex(digest.digest());
             if (!md5.equals(expectedMD5)) {
@@ -121,7 +122,6 @@ public class GruntIOHelper extends IOHelper {
                         md5 + "/" + expectedMD5);
             } else {
                 try {
-                    outFile.close();
                     addTmpToCache(fileCacheMap, md5, lokiCacheDir, tmpCacheFile, cfg);
                 } catch (IOException ex) {
                     log.throwing(className, "receiveFileFromBroker", ex);
@@ -137,7 +137,6 @@ public class GruntIOHelper extends IOHelper {
                 //squelch this!! pointless...
             }
         }
-
         return true;
     }
 

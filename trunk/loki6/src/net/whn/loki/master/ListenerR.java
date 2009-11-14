@@ -1,6 +1,6 @@
 /**
  *Project: Loki Render - A distributed job queue master.
- *Version 0.6.0
+ *Version 0.6.2
  *Copyright (C) 2009 Daniel Petersen
  *Created on Aug 18, 2009
  */

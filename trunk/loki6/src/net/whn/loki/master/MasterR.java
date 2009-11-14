@@ -1,6 +1,6 @@
 /**
  *Project: Loki Render - A distributed job queue manager.
- *Version 0.6.0
+ *Version 0.6.2
  *Copyright (C) 2009 Daniel Petersen
  *Created on Aug 8, 2009, 8:09:39 PM
  */
@@ -234,6 +234,10 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
             removeGrunt(m);
         } else if (type == MsgType.VIEW_GRUNT) {
             viewGrunt(m);
+        } else if (type == MsgType.QUIT_GRUNT) {
+            quitGrunt(m);
+        } else if (type == MsgType.QUIT_ALL_GRUNTS) {
+            quitAllGrunts();
         } else if (type == MsgType.IDLE_GRUNT) {
             idleGrunt(m);
         } else if (type == MsgType.START_QUEUE) {
@@ -430,6 +434,12 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
 
         //finally, set shutdown to true so I exit main loop
         shutdown = true;
+        try {
+        Thread.sleep(1000); //make sure local grunt has time to shutdown
+        } catch (InterruptedException ex) {
+            //squelch...
+        }
+        System.exit(0);
     }
 
     /**
@@ -488,14 +498,23 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
      * view grunt details
      */
     private void viewGrunt(Msg m) {
-        ViewMsg message = (ViewMsg) m;
+        SelectedGruntMsg message = (SelectedGruntMsg) m;
         GruntDetails details = brokersModel.getGruntDetails(message.getRow());
 
         MasterEQCaller.invokeViewGruntDetails(masterForm, details);
     }
 
+    private void quitGrunt(Msg m) throws MasterFrozenException {
+        SelectedGruntMsg message = (SelectedGruntMsg) m;
+        brokersModel.quitGrunt(message.getRow());
+    }
+
+    private void quitAllGrunts() throws MasterFrozenException {
+        brokersModel.quitAllGrunts();
+    }
+
     private void viewJob(Msg m) {
-        ViewMsg message = (ViewMsg) m;
+        SelectedGruntMsg message = (SelectedGruntMsg) m;
         try {
             Job job = jobsModel.getJobDetails(message.getRow());
             MasterEQCaller.invokeViewJobDetails(masterForm, job);

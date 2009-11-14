@@ -1,6 +1,6 @@
 /**
  *Project: Loki Render - A distributed job queue manager.
- *Version 0.6.0
+ *Version 0.6.2
  *Copyright (C) 2009 Daniel Petersen
  *Created on Oct 13, 2009
  */
@@ -26,9 +26,9 @@ package net.whn.loki.messaging;
  *
  * @author daniel
  */
-public class ViewMsg extends Msg {
+public class SelectedGruntMsg extends Msg {
 
-    public ViewMsg(MsgType t, int r) {
+    public SelectedGruntMsg(MsgType t, int r) {
         super(t);
         type = t;
         row = r;

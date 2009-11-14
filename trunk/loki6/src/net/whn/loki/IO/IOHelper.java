@@ -1,6 +1,6 @@
 /**
  *Project: Loki Render - A distributed job queue manager.
- *Version 0.6.0
+ *Version 0.6.2
  *Copyright (C) 2009 Daniel Petersen
  *Created on Sep 2, 2009
  */
@@ -120,7 +120,7 @@ public class IOHelper {
 
     public static void deleteRunningLock(File lokiCfgDir) {
         File runningFile = new File(lokiCfgDir, ".runningLock");
-        if(runningFile.exists()) {
+        if (runningFile.exists()) {
             runningFile.delete();
         }
     }
@@ -229,11 +229,26 @@ public class IOHelper {
 
             //rename file
             md5File = new File(lokiCacheDir, md5);
-            if (!tmpCacheFile.renameTo(md5File)) {
-                log.severe("failed to rename CacheFile: " +
-                        tmpCacheFile.getAbsolutePath() + " to " +
-                        md5File.getAbsolutePath());
-                throw new IOException("failed to rename CacheFile!");
+            if(md5File.exists()) {
+                log.warning("fileCache key set is out of sync w/ files:\n" +
+                        "File: " + md5File.getAbsolutePath() +
+                        " already exists; overwriting.");
+                md5File.delete();
+            }
+            int limit = 0;
+            while (!tmpCacheFile.renameTo(md5File)) {
+                if (limit > 9) {
+                    log.severe("failed to rename CacheFile: " +
+                            tmpCacheFile.getAbsolutePath() + " to " +
+                            md5File.getAbsolutePath());
+                    throw new IOException("failed to rename CacheFile!");
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    break;
+                }
+                limit++;
             }
 
             //create new ProjFile object
