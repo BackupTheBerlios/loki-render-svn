@@ -291,6 +291,9 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
             //cache the file and add to fileCacheMap
             String md5 = MasterIOHelper.newFileToCache(fileCacheMap,
                     newJobInput.getProjFileName(), lokiCacheDir, cfg);
+            String blendCacheMd5 = MasterIOHelper.addBlendCacheToLokiCache(
+                    fileCacheMap, lokiCacheDir, newJobInput.getProjFileName(),
+                    cfg);
             File pFile = new File(newJobInput.getProjFileName());
             long size = pFile.length();
             if (md5 == null) {
@@ -302,7 +305,7 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
 
             } else {
                 //file was successfully added to cache; create/add new job
-                Job newJob = new Job(newJobInput, md5, size);
+                Job newJob = new Job(newJobInput, md5, blendCacheMd5, size);
                 jobsModel.addJob(newJob);
                 updateProgressBar();
             }

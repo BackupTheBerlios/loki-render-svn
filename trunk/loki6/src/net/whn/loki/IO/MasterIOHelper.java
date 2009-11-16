@@ -4,7 +4,6 @@
  *Copyright (C) 2009 Daniel Petersen
  *Created on Oct 27, 2009
  */
-
 /**
  *This program is free software: you can redistribute it and/or modify
  *it under the terms of the GNU General Public License as published by
@@ -19,7 +18,6 @@
  *You should have received a copy of the GNU General Public License
  *along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.whn.loki.IO;
 
 import net.whn.loki.master.*;
@@ -38,8 +36,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import net.whn.loki.common.Config;
-import net.whn.loki.IO.IOHelper;
 import net.whn.loki.common.ProjFile;
 import net.whn.loki.common.Task;
 import net.whn.loki.network.BrokerStreamSocket;
@@ -254,4 +253,53 @@ public class MasterIOHelper extends IOHelper {
         return true;
     }
 
+    /**
+     * checks if blendcache directory exists; if so, packs into zip file
+     * and adds to loki file cache
+     * @param lokigCfgBasedir, blendFile
+     * @return md5 of resulting zip file in cache, null otherwise
+     */
+    public static String addBlendCacheToLokiCache(
+            ConcurrentHashMap<String, ProjFile> fileCacheMap,
+            File lokiCacheDir, String blendFileStr, Config cfg) {
+
+        String md5 = null;
+
+        File tmpZipFile = new File(lokiCacheDir, File.separator +
+                "blendcache.zip");
+
+        File blendFile = new File(blendFileStr);
+        File parentDir = blendFile.getParentFile();
+        String fileName = blendFile.getName();
+        int dotIndex = fileName.lastIndexOf('.');
+
+        if (dotIndex != -1) {
+            fileName = fileName.substring(0, dotIndex);
+        }
+        File cacheDir = new File(parentDir, "blendcache_" + fileName);
+        if (!cacheDir.isDirectory()) {
+            return null;
+        }
+
+        String[] files = cacheDir.list();
+        if (files.length < 1) {
+            return null;
+        }
+
+        files = null;
+        if (!zipDirectory(cacheDir, tmpZipFile)) {
+            return null;
+        }
+
+        try {
+            md5 = generateMD5(tmpZipFile);
+            addTmpToCache(fileCacheMap, md5, lokiCacheDir, tmpZipFile, cfg);
+            return md5;
+        } catch (IOException ex) {
+            log.warning("failed to generate md5 for " +
+                    tmpZipFile.toString());
+            return null;
+        }
+
+    }
 }

@@ -20,12 +20,17 @@
  */
 package net.whn.loki.IO;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import net.whn.loki.common.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -35,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
+import java.util.zip.ZipInputStream;
 import javax.swing.ProgressMonitorInputStream;
 
 /**
@@ -193,6 +199,75 @@ public class IOHelper {
         }
     }
 
+    /**
+     * zips up a given directory. skips subdirectories!
+     * @param dir
+     * @param outputZipFile
+     * @return
+     */
+    public static boolean zipDirectory(File dir, File outputZipFile) {
+        if (outputZipFile.exists()) {
+            outputZipFile.delete();
+            log.warning(outputZipFile.toString() + " already exists: overwriting");
+        }
+        IOHelper.start = System.currentTimeMillis();
+        try {
+            ZipOutputStream out = new ZipOutputStream(new FileOutputStream(outputZipFile));
+            out.setLevel(1);
+            addDir(dir, out);
+            out.close();
+            log.info("zipped blendcache in (ms): " + (System.currentTimeMillis() - IOHelper.start));
+            return true;
+        } catch (Exception ex) {
+            log.warning("failed to zip blendcache directory: " + ex.toString());
+        }
+        return false;
+    }
+
+    /**
+     * creates the output directory, and unzips files contents into it.
+     * @param zipFile contains contents to be unzipped
+     * @param outputDir the directory to create and unzip contents into
+     * @return true if succeeds, false otherwise
+     */
+    public static boolean unzipDirectory(File zipFile, File outputDir) {
+        try {
+            if (!zipFile.isFile()) {
+                return false;
+            }
+            //create directory
+            if(!outputDir.mkdir()) {
+                return false;
+            }
+
+            start = System.currentTimeMillis();
+            ZipInputStream zin =
+                    new ZipInputStream(new FileInputStream(zipFile));
+            FileOutputStream fos = null;
+
+            ZipEntry zipEntry;
+            File fileEntry;
+            while ((zipEntry = zin.getNextEntry()) != null) {
+                int read;
+                byte[] buffer = new byte[4096];
+
+                fileEntry = new File(outputDir, zipEntry.getName());
+                fos = new FileOutputStream(fileEntry);
+                while ((read = zin.read(buffer)) > 0) {
+                    fos.write(buffer, 0, read);
+                }
+                fos.close();
+            }
+
+            zin.close();
+
+            return true;
+        } catch (Exception ex) {
+            log.warning("failed to unpack zip file: " + zipFile.toString());
+        }
+        return false;
+    }
+
     /*PROTECTED*/
     protected static final int BUFFER_SIZE = 8192;
     protected static long start;
@@ -229,7 +304,7 @@ public class IOHelper {
 
             //rename file
             md5File = new File(lokiCacheDir, md5);
-            if(md5File.exists()) {
+            if (md5File.exists()) {
                 log.warning("fileCache key set is out of sync w/ files:\n" +
                         "File: " + md5File.getAbsolutePath() +
                         " already exists; overwriting.");
@@ -362,5 +437,25 @@ public class IOHelper {
         }
 
         return ok;
+    }
+
+    private static void addDir(File dir, ZipOutputStream out) throws IOException {
+        File[] files = dir.listFiles();
+        byte[] tmpBuf = new byte[4096];
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isDirectory()) {
+                //addDir(files[i], out);
+                continue;
+            }
+            FileInputStream in = new FileInputStream(files[i].getAbsolutePath());
+            //out.putNextEntry(new ZipEntry(files[i].getAbsolutePath()));
+            out.putNextEntry(new ZipEntry(files[i].getName()));
+            int len;
+            while ((len = in.read(tmpBuf)) > 0) {
+                out.write(tmpBuf, 0, len);
+            }
+            out.closeEntry();
+            in.close();
+        }
     }
 }

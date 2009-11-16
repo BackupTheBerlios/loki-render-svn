@@ -35,7 +35,8 @@ import net.whn.loki.common.TaskReport;
  */
 public class Job implements ICommon, Serializable {
 
-    public Job(JobFormInput jI, String md5, long pFileSize) {
+    public Job(JobFormInput jI, String md5, String blendCacheMd5,
+            long pFileSize) {
         jobID = jobIDCounter++;
         //TODO - temporary. change into enum later w/ enumComboBox
         if (jI.getTaskType().equalsIgnoreCase(JobType.BLENDER.toString())) {
@@ -45,6 +46,7 @@ public class Job implements ICommon, Serializable {
         origProjFile = new File(jI.getProjFileName());   //replace this with a projectFile object
         outputDirFile = new File(jI.getOutputDirName());
         pFileMD5 = md5;
+        blendCacheMD5 = blendCacheMd5;
         filePrefix = jI.getFilePrefix();
 
         running = 0;
@@ -71,7 +73,7 @@ public class Job implements ICommon, Serializable {
             for (int f = 0; f < totalFrames; f++) {
                 for (int t = 0; t < tilesPerFrame; t++) {
                     tasks[tCount] = new Task(type, firstFrame + f, jobID,
-                            md5, pFileSize, outputDirStr, filePrefix,
+                            md5, blendCacheMd5, pFileSize, outputDirStr, filePrefix,
                             true, t, tilesPerFrame, tileBorders[t]);
 
                     tCount++;
@@ -88,7 +90,8 @@ public class Job implements ICommon, Serializable {
             ready = tasks.length;    //initially, all tasks are READY
 
             for (int t = 0; t < tasks.length; t++) {
-                tasks[t] = new Task(type, firstFrame + t, jobID, md5, pFileSize,
+                tasks[t] = new Task(type, firstFrame + t, jobID, md5,
+                        blendCacheMd5, pFileSize,
                         outputDirStr, filePrefix, false, -1, -1, null);
             }
         }
@@ -364,6 +367,7 @@ public class Job implements ICommon, Serializable {
     private final File outputDirFile;   //broker saves output here, master verifies
     private final String filePrefix;    //broker uses this
     private final String pFileMD5;
+    private final String blendCacheMD5;
     private int ready, running, done, failed;
     private final boolean tileRender;
     private final int tileMultiplier;
