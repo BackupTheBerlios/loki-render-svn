@@ -21,6 +21,8 @@ package net.whn.loki.common;
  */
 public interface ICommon {
 
+    enum FileCacheType {BLEND, BLEND_CACHE};
+
     enum LokiRole { GRUNT, GRUNTCL, MASTER, MASTER_GRUNT, ASK };
 
     /**
@@ -67,7 +69,10 @@ public interface ICommon {
     /**
      * grunt update text status
      */
-    enum GruntTxtStatus { IDLE, BUSY, FETCH, SEND, PENDING_SEND, ABORT, ERROR };
+    enum GruntTxtStatus { 
+        IDLE, BUSY, FETCH, PREP_CACHE, SEND,
+        PENDING_SEND, ABORT, ERROR
+    };
 
     /**
      * header type for network communication. this object is the lead object

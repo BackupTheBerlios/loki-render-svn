@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.logging.Logger;
+import net.whn.loki.IO.IOHelper;
 import net.whn.loki.common.Task;
 import net.whn.loki.common.ICommon;
 import net.whn.loki.common.TaskReport;
@@ -57,6 +58,8 @@ public class Job implements ICommon, Serializable {
         String outputDirStr = jI.getOutputDirName();
 
         tileRender = jI.isTileEnabled();
+        String blendCacheDirName = IOHelper.generateBlendCacheDirName(
+                pFileMD5);
 
         if (tileRender) {
             tileMultiplier = jI.getTileMultiplier();
@@ -73,8 +76,9 @@ public class Job implements ICommon, Serializable {
             for (int f = 0; f < totalFrames; f++) {
                 for (int t = 0; t < tilesPerFrame; t++) {
                     tasks[tCount] = new Task(type, firstFrame + f, jobID,
-                            md5, blendCacheMd5, pFileSize, outputDirStr, filePrefix,
-                            true, t, tilesPerFrame, tileBorders[t]);
+                            md5, blendCacheMd5, blendCacheDirName,
+                            pFileSize, outputDirStr, filePrefix, true, t,
+                            tilesPerFrame, tileBorders[t]);
 
                     tCount++;
                 }
@@ -91,7 +95,7 @@ public class Job implements ICommon, Serializable {
 
             for (int t = 0; t < tasks.length; t++) {
                 tasks[t] = new Task(type, firstFrame + t, jobID, md5,
-                        blendCacheMd5, pFileSize,
+                        blendCacheMd5, blendCacheDirName, pFileSize,
                         outputDirStr, filePrefix, false, -1, -1, null);
             }
         }

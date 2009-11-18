@@ -42,7 +42,6 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 import net.whn.loki.master.JobsModel;
-import net.whn.loki.master.MasterR;
 
 /**
  *
@@ -89,6 +88,7 @@ public class Config implements Serializable, ICommon {
         
         //grunt
         blenderBin = "blender";
+        blendCacheMD5 = null;
     }
 
     public String getLokiVer() {
@@ -149,6 +149,22 @@ public class Config implements Serializable, ICommon {
 
     public String getBlenderBin() {
         return blenderBin;
+    }
+
+    public void setActiveBlendCacheMD5(String bcMD5) {
+        blendCacheMD5 = bcMD5;
+    }
+
+    public String getActiveBlendCacheMD5() {
+        return blendCacheMD5;
+    }
+
+    public void setActiveBlendCacheDir(String bcDir) {
+        blendCacheDir = bcDir;
+    }
+
+    public String getActiveBlendCacheDir() {
+        return blendCacheDir;
     }
 
     public File getOutDirFile() {
@@ -299,6 +315,8 @@ public class Config implements Serializable, ICommon {
     private String filePrefix;
     //grunt
     private String blenderBin;
+    private String blendCacheMD5;
+    private String blendCacheDir;
     //IO
     private static final Deflater fastDeflater = new Deflater(1);
     private static long time;

@@ -314,7 +314,7 @@ public class GruntR implements Runnable, ICommon {
         } else if (h.getType() == HdrType.TASK_ABORT) {
             abortCurrentTask(TaskStatus.MASTER_ABORT);
         } else if (h.getType() == HdrType.QUIT_AFTER_TASK) {
-            if(task == null) {
+            if (task == null) {
                 shutdown(false);
             } else {
                 shutdown(true);
@@ -341,14 +341,14 @@ public class GruntR implements Runnable, ICommon {
             machineUpdateHandler.shutdownNow();
         }
         try {
-            if(patient) {
-                while(!taskHandler.isTerminated()) {
-                  //patiently waiting...
+            if (patient) {
+                while (!taskHandler.isTerminated()) {
+                    //patiently waiting...
                 }
             } else {
                 taskHandler.awaitTermination(1, TimeUnit.SECONDS);
             }
-            
+
             taskHandler.shutdownNow();
             signalShutdown();
         } catch (InterruptedException ex) {
@@ -384,7 +384,7 @@ public class GruntR implements Runnable, ICommon {
             gruntForm.dispose();
         }
 
-        if(master == null) {
+        if (master == null) {
             System.exit(0);
         }
     }
@@ -408,8 +408,10 @@ public class GruntR implements Runnable, ICommon {
         updateStatus(GruntTxtStatus.FETCH, size);
 
         try {
-            if (GruntIOHelper.receiveFileFromBroker(gruntForm, cfg.getFileCacheMap(),
+            if (GruntIOHelper.receiveFileFromBroker(h.getFileCacheType(),
+                    gruntForm, cfg.getFileCacheMap(),
                     gruntStreamSock, lokiCacheDir, size, h.getMD5(), cfg)) {
+
                 return true;
             }
         } catch (FileNotFoundException ex) {
@@ -536,7 +538,7 @@ public class GruntR implements Runnable, ICommon {
                 log.severe("task is null!");
             } else {
                 status = GruntStatus.BUSY;
-                if (isFileInCache()) {   //have file? if not, request it
+                if (AreFilesInCache()) {   //have file? if not, request it
                     //we have the project file, so continue...
                     if (task.getStatus() == TaskStatus.DONE ||
                             task.getStatus() == TaskStatus.FAILED) {
@@ -687,7 +689,7 @@ public class GruntR implements Runnable, ICommon {
          * @return true if we have all file deps met, false if we had to
          * request one
          */
-        private boolean isFileInCache() {
+        private boolean AreFilesInCache() {
             if (!cfg.getFileCacheMap().containsKey(task.getProjectFileMD5())) {
                 //don't have this file; request it:
                 if (previousMD5Request == null) {
@@ -695,9 +697,28 @@ public class GruntR implements Runnable, ICommon {
                 } else {
                     log.warning("previousMD5Request not null for handler!");
                 }
+            } else if (task.getBlendCacheMD5() != null) {
 
+                if (!cfg.getFileCacheMap().containsKey(
+                        task.getBlendCacheMD5())) {
+                    //don't have this file; request it:
+                    if (previousMD5Request == null) {
+                        previousMD5Request = task.getBlendCacheMD5(); //broker checks on receive
+                    } else {
+                        log.warning("previousMD5Request not null for handler!");
+                    }
+                } else {    //we have in cache, so make sure it's active
+                    updateStatus(GruntTxtStatus.PREP_CACHE);
+                    GruntIOHelper.handleActiveBlendCache(lokiCacheDir,
+                            task.getBlendCacheDirName(),
+                            task.getBlendCacheMD5(), cfg);
+
+                }
+            }
+
+            if (previousMD5Request != null) {
                 Hdr FileRequestHdr = new Hdr(HdrType.FILE_REQUEST,
-                        task.getProjectFileMD5());
+                        previousMD5Request);
                 sendHdr(FileRequestHdr);
                 return false;
             } else {

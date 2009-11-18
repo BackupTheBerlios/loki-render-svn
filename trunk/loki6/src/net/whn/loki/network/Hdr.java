@@ -31,6 +31,7 @@ public class Hdr implements Serializable, ICommon {
 
     public Hdr(HdrType t) {
         type = t;
+        fcType = null;
         report = null;
         machine = null;
         machineUpdate = null;
@@ -42,6 +43,7 @@ public class Hdr implements Serializable, ICommon {
     //constructor for MACHINE_INFO
     public Hdr(HdrType t, Machine m) {
         type = t;
+        fcType = null;
         report = null;
         machine = m;
         machineUpdate = null;
@@ -53,6 +55,7 @@ public class Hdr implements Serializable, ICommon {
     //constructor for MACHINE_UPDATE
     public Hdr(HdrType t, MachineUpdate mu) {
         type = t;
+        fcType = null;
         report = null;
         machine = null;
         machineUpdate = mu;
@@ -64,6 +67,7 @@ public class Hdr implements Serializable, ICommon {
     //constructor for TASK_SEND
     public Hdr(HdrType t, Task tk) {
         type = t;
+        fcType = null;
         report = null;
         machine = null;
         machineUpdate = null;
@@ -75,6 +79,7 @@ public class Hdr implements Serializable, ICommon {
     //constructor for FILE_REQUEST
     public Hdr(HdrType t, String m) {
         type = t;
+        fcType = null;
         report = null;
         machine = null;
         machineUpdate = null;
@@ -84,8 +89,9 @@ public class Hdr implements Serializable, ICommon {
     }
 
     //constructor for FILE_REPLY
-    public Hdr(HdrType t, String m, long s) {
+    public Hdr(HdrType t, FileCacheType fct, String m, long s) {
         type = t;
+        fcType = fct;
         report = null;
         machine = null;
         machineUpdate = null;
@@ -97,6 +103,7 @@ public class Hdr implements Serializable, ICommon {
     //constructor for TASK_REPORT
     public Hdr(HdrType t, TaskReport r) {
         type = t;
+        fcType = null;
         report = r;
         machine = null;
         machineUpdate = null;
@@ -107,6 +114,10 @@ public class Hdr implements Serializable, ICommon {
 
     public HdrType getType() {
         return type;
+    }
+
+    public FileCacheType getFileCacheType() {
+        return fcType;
     }
 
     public Machine getMachine() {
@@ -140,5 +151,6 @@ public class Hdr implements Serializable, ICommon {
     private final MachineUpdate machineUpdate;
     private final Task task;
     private final String md5;
+    private final FileCacheType fcType;
     private final long size;
 }

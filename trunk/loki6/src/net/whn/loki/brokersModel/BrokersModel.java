@@ -110,12 +110,6 @@ public class BrokersModel extends AbstractTableModel implements ICommon {
         }
     }
 
-    /**
-     * initializes columnHeaders, from which is derived columnCount
-     * NOTE: make sure to update Broker.getValue() if you change headers
-     * ...it's probably best to keep everything we want here, then
-     * just hide headers with the JTabel
-     */
     public void handleFileRequest(Msg m) {
         FileRequestMsg frMsg = (FileRequestMsg) m;
         fileSendPool.submit(new FileToGruntTask(frMsg.getMD5(),
@@ -198,8 +192,10 @@ public class BrokersModel extends AbstractTableModel implements ICommon {
      */
     public void setGruntStatusToIdle(long gID) {
         int index = getBrokerIndex(gID);
-        brokersList.get(index).setGruntStatus(GruntStatus.IDLE);
-        fireTableRowsUpdated(index, index);
+        if (index != -1) {
+            brokersList.get(index).setGruntStatus(GruntStatus.IDLE);
+            fireTableRowsUpdated(index, index);
+        }
     }
 
     public void removeGrunt(long gruntID) {
@@ -229,8 +225,11 @@ public class BrokersModel extends AbstractTableModel implements ICommon {
 
     public void quitGrunt(int gruntRow) throws MasterFrozenException {
         try {
-            brokersList.get(gruntRow).sendQuit();
-            updateBrokerRow(gruntRow, "last");
+            if (gruntRow < brokersList.size()) {
+                brokersList.get(gruntRow).sendQuit();
+                updateBrokerRow(gruntRow, "last");
+            }
+
         } catch (IOException ex) {
             log.info("failed on send to grunt");
             try {
@@ -339,8 +338,6 @@ public class BrokersModel extends AbstractTableModel implements ICommon {
         }
         return -1;
     }
-
-
 
     /**l
      * private inner class that sends file to grunt via the broker socket

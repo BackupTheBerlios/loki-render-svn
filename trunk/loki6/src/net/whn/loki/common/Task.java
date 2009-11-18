@@ -33,7 +33,7 @@ import java.io.Serializable;
 public class Task implements ICommon, Serializable, Cloneable {
 
     public Task(JobType t, int f, long jID, String m, String bcm, 
-            long s, String oDir, String oPrefix, boolean tRender,
+            String bcd, long s, String oDir, String oPrefix, boolean tRender,
             int tl, int tff,
             TileBorder tBorder) {
         taskID = taskIDCounter++;
@@ -43,6 +43,7 @@ public class Task implements ICommon, Serializable, Cloneable {
         jobID = jID;
         projectFileMD5 = m;
         blendCacheMD5 = bcm;
+        blendCacheDirName = bcd;
         projectFileSize = s;
         outputDir = oDir;
         outputFilePrefix = oPrefix;
@@ -148,6 +149,14 @@ public class Task implements ICommon, Serializable, Cloneable {
         return projectFileMD5;
     }
 
+    public String getBlendCacheMD5() {
+        return blendCacheMD5;
+    }
+
+    public String getBlendCacheDirName() {
+        return blendCacheDirName;
+    }
+
     public long getProjectFileSize() {
         return projectFileSize;
     }
@@ -224,6 +233,7 @@ public class Task implements ICommon, Serializable, Cloneable {
     private final long jobID;
     private final String projectFileMD5;
     private final String blendCacheMD5;
+    private final String blendCacheDirName;
     private final long projectFileSize;
     private final String outputDir;
     private final String outputFilePrefix;

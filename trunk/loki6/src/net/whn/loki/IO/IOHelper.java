@@ -20,7 +20,6 @@
  */
 package net.whn.loki.IO;
 
-import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -30,7 +29,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -38,10 +36,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import java.util.zip.Deflater;
-import java.util.zip.DeflaterOutputStream;
 import java.util.zip.ZipInputStream;
-import javax.swing.ProgressMonitorInputStream;
+import net.whn.loki.common.ICommon.FileCacheType;
 
 /**
  *
@@ -236,7 +232,7 @@ public class IOHelper {
                 return false;
             }
             //create directory
-            if(!outputDir.mkdir()) {
+            if (!outputDir.mkdir()) {
                 return false;
             }
 
@@ -268,6 +264,30 @@ public class IOHelper {
         return false;
     }
 
+    public static boolean deleteDirectory(File dir) {
+        if (dir.exists()) {
+            File[] files = dir.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) {
+                    deleteDirectory(files[i]);
+                } else {
+                    files[i].delete();
+                }
+            }
+        }
+        return (dir.delete());
+    }
+
+    public static String generateBlendCacheDirName(String blendFileName) {
+        int dotIndex = blendFileName.lastIndexOf('.');
+
+        if (dotIndex != -1) {
+            blendFileName = blendFileName.substring(0, dotIndex);
+        }
+
+        return "blendcache_" + blendFileName;
+    }
+
     /*PROTECTED*/
     protected static final int BUFFER_SIZE = 8192;
     protected static long start;
@@ -289,7 +309,7 @@ public class IOHelper {
      * @param lokiCacheDir
      * @param tmpCacheFile
      */
-    protected static void addTmpToCache(
+    protected static void addTmpToCache(FileCacheType fcType,
             ConcurrentHashMap<String, ProjFile> fileCacheMap,
             String md5, File lokiCacheDir, File tmpCacheFile, Config cfg)
             throws IOException {
@@ -303,7 +323,12 @@ public class IOHelper {
             //new file, so rename and add to map:
 
             //rename file
-            md5File = new File(lokiCacheDir, md5);
+            if(fcType == FileCacheType.BLEND) {
+                md5File = new File(lokiCacheDir, md5 + ".blend");
+            } else {
+                md5File = new File(lokiCacheDir, md5);
+            }
+            
             if (md5File.exists()) {
                 log.warning("fileCache key set is out of sync w/ files:\n" +
                         "File: " + md5File.getAbsolutePath() +
@@ -327,7 +352,7 @@ public class IOHelper {
             }
 
             //create new ProjFile object
-            pFile = new ProjFile(md5File, md5);
+            pFile = new ProjFile(fcType, md5File, md5);
 
             //insert it into the fileCache
             fileCacheMap.put(md5, pFile);
@@ -351,10 +376,6 @@ public class IOHelper {
     private static final String className =
             "net.whn.loki.common.LokiFileHelper";
     private static final Logger log = Logger.getLogger(className);
-    //for file I/O
-    private static ProgressMonitorInputStream pmin = null;
-    private static DeflaterOutputStream dout = null;
-    private final static Deflater fastDeflater = new Deflater(1);
 
     /**
      * should be called after a new file has been added to the cache.

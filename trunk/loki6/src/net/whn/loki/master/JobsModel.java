@@ -83,7 +83,13 @@ public class JobsModel extends AbstractTableModel implements ICommon,
      */
     @Override
     public Object getValueAt(int row, int column) {
-        return jobsList.get(row).getValue(column);
+        if (row < jobsList.size()) {
+            return jobsList.get(row).getValue(column);
+        } else {
+            return "";
+        }
+
+        
     }
 
     /*BEGIN PACKAGE*/

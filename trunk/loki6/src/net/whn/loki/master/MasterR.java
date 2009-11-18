@@ -288,8 +288,8 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
                     "' already exists. Please use a unique name.",
                     JOptionPane.INFORMATION_MESSAGE);
         } else {
-            //cache the file and add to fileCacheMap
-            String md5 = MasterIOHelper.newFileToCache(fileCacheMap,
+            //cache the project file and add to fileCacheMap
+            String md5 = MasterIOHelper.newProjFileToCache(fileCacheMap,
                     newJobInput.getProjFileName(), lokiCacheDir, cfg);
             String blendCacheMd5 = MasterIOHelper.addBlendCacheToLokiCache(
                     fileCacheMap, lokiCacheDir, newJobInput.getProjFileName(),
@@ -311,6 +311,7 @@ public class MasterR extends MsgQueue implements Runnable, ICommon {
             }
 
         }
+        message.disposeAddingJobForm();
     }
 
     private void resetFailures(Msg m) {

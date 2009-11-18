@@ -35,7 +35,6 @@ public class Main {
      */
     public static void main(String[] args) {
         LokiForm lokiForm = null;
-        System.out.println(System.getProperty("user.dir"));//test
 
         //if null, no arg was found
         String blenderExe = handleArgs(args);

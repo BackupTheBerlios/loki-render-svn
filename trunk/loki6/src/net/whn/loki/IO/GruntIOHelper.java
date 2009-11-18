@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import net.whn.loki.common.Config;
 import net.whn.loki.IO.IOHelper;
+import net.whn.loki.common.ICommon.FileCacheType;
 import net.whn.loki.common.ProgressUpdate;
 import net.whn.loki.common.ProjFile;
 import net.whn.loki.common.Task;
@@ -76,13 +77,13 @@ public class GruntIOHelper extends IOHelper {
     /**
      * receives file from broker via network, and adds to cache
      */
-    public static boolean receiveFileFromBroker(GruntForm gruntForm,
+    public static boolean receiveFileFromBroker(
+            FileCacheType fcType, GruntForm gruntForm,
             ConcurrentHashMap<String, ProjFile> fileCacheMap,
             GruntStreamSocket gSSock, File lokiCacheDir,
             long total, String expectedMD5, Config cfg)
-        throws FileNotFoundException, NoSuchAlgorithmException,
-        IOException
-        {
+            throws FileNotFoundException, NoSuchAlgorithmException,
+            IOException {
 
         long remaining = total;
         byte[] buffer = new byte[BUFFER_SIZE];
@@ -109,9 +110,9 @@ public class GruntIOHelper extends IOHelper {
                 outFile.write(buffer, 0, amountRead);
                 remaining -= amountRead;
 
-                if(gruntForm != null) {
+                if (gruntForm != null) {
                     GruntEQCaller.invokeGruntUpdatePBar(gruntForm,
-                        new ProgressUpdate(total, remaining));
+                            new ProgressUpdate(total, remaining));
                 }
             }
             outFile.close();
@@ -122,7 +123,8 @@ public class GruntIOHelper extends IOHelper {
                         md5 + "/" + expectedMD5);
             } else {
                 try {
-                    addTmpToCache(fileCacheMap, md5, lokiCacheDir, tmpCacheFile, cfg);
+                    addTmpToCache(fcType, fileCacheMap, md5, lokiCacheDir,
+                            tmpCacheFile, cfg);
                 } catch (IOException ex) {
                     log.throwing(className, "receiveFileFromBroker", ex);
                     return false;
@@ -138,6 +140,37 @@ public class GruntIOHelper extends IOHelper {
             }
         }
         return true;
+    }
+
+    /**
+     * makes the given blendCacheActive (if not already active) by deleting
+     * the old directory, and unzipping from the file cache
+     * @param lcDir
+     * @param bcDirName
+     */
+    public static void handleActiveBlendCache(File lokiCacheDir,
+            String newBCDir, String newMD5, Config cfg) {
+
+        if (!newMD5.equals(cfg.getActiveBlendCacheMD5())) {
+            //delete old one if it exists
+            if (cfg.getActiveBlendCacheDir() != null) {
+                File oldDir = new File(lokiCacheDir, cfg.getActiveBlendCacheDir());
+                if (oldDir.isDirectory()) {
+                    deleteDirectory(oldDir);
+                }
+            }
+
+            File blendCacheDir = new File(lokiCacheDir, newBCDir);
+
+            //unzip directory
+            File blendCacheFile = new File(lokiCacheDir, newMD5);
+            unzipDirectory(blendCacheFile, blendCacheDir);
+
+            //add to cfg file
+            cfg.setActiveBlendCacheDir(newBCDir);
+            cfg.setActiveBlendCacheMD5(newMD5);
+        }
+
     }
 
     public static void sendOutputFileToBroker(GruntForm gForm, File oFile, GruntStreamSocket gSock) throws IOException {
@@ -162,7 +195,7 @@ public class GruntIOHelper extends IOHelper {
                     gSock.sendFileChunk(buffer, amountRead);
                     remaining -= amountRead;
 
-                    if(gForm != null) {
+                    if (gForm != null) {
                         GruntEQCaller.invokeGruntUpdatePBar(gForm,
                                 new ProgressUpdate(total, remaining));
                     }

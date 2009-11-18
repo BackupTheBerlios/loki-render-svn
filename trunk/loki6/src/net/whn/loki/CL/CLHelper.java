@@ -168,7 +168,7 @@ public class CLHelper implements ICommon {
             File lokiBaseDir, Task t) throws IOException {
 
         File blendFile = new File(lokiBaseDir, "fileCache" +
-                File.separator + t.getProjectFileMD5());
+                File.separator + t.getProjectFileMD5() + ".blend");
         File tmpDirFile = new File(lokiBaseDir, "tmp");
         String[] blenderCL = null;
 

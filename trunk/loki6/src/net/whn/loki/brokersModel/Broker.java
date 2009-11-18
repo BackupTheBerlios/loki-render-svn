@@ -261,8 +261,8 @@ public class Broker implements Runnable, ICommon {
      */
     synchronized void sendFile(ProjFile pFile) throws IOException {
 
-        bSSock.sendHdr(new Hdr(HdrType.FILE_REPLY, pFile.getMD5(),
-                pFile.getSize()));
+        bSSock.sendHdr(new Hdr(HdrType.FILE_REPLY, pFile.getFileCacheType(),
+                pFile.getMD5(), pFile.getSize()));
         MasterIOHelper.sendProjectFileToGrunt(pFile, bSSock);
     }
 

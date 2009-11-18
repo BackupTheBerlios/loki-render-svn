@@ -22,6 +22,7 @@
 
 package net.whn.loki.messaging;
 
+import net.whn.loki.common.LokiForm;
 import net.whn.loki.master.*;
 
 /**
@@ -30,15 +31,21 @@ import net.whn.loki.master.*;
  */
 public class AddJobMsg extends Msg {
     
-    public AddJobMsg(JobFormInput j) {
+    public AddJobMsg(JobFormInput j, LokiForm ajForm) {
         super(MsgType.ADD_JOB);
         jobInput = j;
+        addingJobForm = ajForm;
     }
 
     public JobFormInput getJobInput() {
         return jobInput;
     }
 
+    public void disposeAddingJobForm() {
+        addingJobForm.dispose();
+    }
+
     /*BEGIN PRIVATE*/
     private JobFormInput jobInput;
+    private LokiForm addingJobForm;
 }

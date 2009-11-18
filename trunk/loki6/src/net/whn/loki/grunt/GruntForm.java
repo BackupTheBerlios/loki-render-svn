@@ -59,12 +59,15 @@ public class GruntForm extends LokiForm {
             pBar.setValue(0);
             pBar.setIndeterminate(false);
         } else if (s.getStatus() == GruntTxtStatus.FETCH) {
-            String txt = "fetching project file " +
+            String txt = "fetching file " +
                     GruntIOHelper.generateHumanReadableFileSize(s.getFileSize());
             lblStatus.setText(txt);
             pBar.setIndeterminate(false);
             log.fine(txt);
-        } else if (s.getStatus() == GruntTxtStatus.SEND) {
+        } else if (s.getStatus() == GruntTxtStatus.PREP_CACHE) {
+            lblStatus.setText("preparing blendcache");
+            pBar.setIndeterminate(true);
+        }else if (s.getStatus() == GruntTxtStatus.SEND) {
             String txt = "sending output file " +
                     GruntIOHelper.generateHumanReadableFileSize(s.getFileSize());
             lblStatus.setText(txt);

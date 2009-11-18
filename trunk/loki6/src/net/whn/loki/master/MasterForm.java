@@ -120,7 +120,10 @@ public class MasterForm extends LokiForm implements ICommon {
      */
     void addJob(JobFormInput j) {
         try {
-            manager.deliverMessage(new AddJobMsg(j));
+            AddingJobForm ajForm = new AddingJobForm();
+            ajForm.setLocationRelativeTo(this);
+            ajForm.setVisible(true);
+            manager.deliverMessage(new AddJobMsg(j, ajForm));
         } catch (InterruptedException IntEx) {
             log.severe("interrupted exception: " + IntEx.toString());
         } catch (MasterFrozenException mfe) {

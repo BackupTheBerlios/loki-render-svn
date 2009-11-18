@@ -24,6 +24,7 @@ package net.whn.loki.common;
 
 import java.io.File;
 import java.io.Serializable;
+import net.whn.loki.common.ICommon.FileCacheType;
 
 /**
  *
@@ -31,7 +32,8 @@ import java.io.Serializable;
  */
 public class ProjFile implements Serializable {
 
-    public ProjFile(File file, String m) {
+    public ProjFile(FileCacheType fcType, File file, String m) {
+       fileCacheType = fcType;
        projFile = file;
        md5 = m;
        timeLastUsed = System.currentTimeMillis();
@@ -48,6 +50,10 @@ public class ProjFile implements Serializable {
 
     public String getMD5() {
         return md5;
+    }
+
+    public FileCacheType getFileCacheType() {
+        return fileCacheType;
     }
 
     public long getTimeLastUsed() {
@@ -68,6 +74,7 @@ public class ProjFile implements Serializable {
 
     /*BEGIN PRIVATE*/
 
+    private final ICommon.FileCacheType fileCacheType;
     private final File projFile;
     private final String md5;
     private long timeLastUsed;

@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import net.whn.loki.common.Config;
+import net.whn.loki.common.ICommon.FileCacheType;
 import net.whn.loki.common.ProjFile;
 import net.whn.loki.common.Task;
 import net.whn.loki.network.BrokerStreamSocket;
@@ -72,7 +73,7 @@ public class MasterIOHelper extends IOHelper {
      * @param lokiCacheDir
      * @return md5 string of cached file, null otherwise
      */
-    public static String newFileToCache(
+    public static String newProjFileToCache(
             ConcurrentHashMap<String, ProjFile> fileCacheMap,
             String oFile, File lokiCacheDir, Config cfg) {
 
@@ -118,7 +119,8 @@ public class MasterIOHelper extends IOHelper {
             }
         }
         try {
-            addTmpToCache(fileCacheMap, md5, lokiCacheDir, tmpCacheFile, cfg);
+            addTmpToCache(FileCacheType.BLEND, fileCacheMap, md5,
+                    lokiCacheDir, tmpCacheFile, cfg);
         } catch (IOException ex) {
             log.throwing(className, "newFileToCache", ex);
             return null;
@@ -271,12 +273,10 @@ public class MasterIOHelper extends IOHelper {
         File blendFile = new File(blendFileStr);
         File parentDir = blendFile.getParentFile();
         String fileName = blendFile.getName();
-        int dotIndex = fileName.lastIndexOf('.');
+        
+        File cacheDir = new File(parentDir, 
+                generateBlendCacheDirName(fileName));
 
-        if (dotIndex != -1) {
-            fileName = fileName.substring(0, dotIndex);
-        }
-        File cacheDir = new File(parentDir, "blendcache_" + fileName);
         if (!cacheDir.isDirectory()) {
             return null;
         }
@@ -286,20 +286,19 @@ public class MasterIOHelper extends IOHelper {
             return null;
         }
 
-        files = null;
         if (!zipDirectory(cacheDir, tmpZipFile)) {
             return null;
         }
 
         try {
             md5 = generateMD5(tmpZipFile);
-            addTmpToCache(fileCacheMap, md5, lokiCacheDir, tmpZipFile, cfg);
+            addTmpToCache(FileCacheType.BLEND_CACHE, fileCacheMap, md5,
+                    lokiCacheDir, tmpZipFile, cfg);
             return md5;
         } catch (IOException ex) {
             log.warning("failed to generate md5 for " +
                     tmpZipFile.toString());
             return null;
         }
-
     }
 }
