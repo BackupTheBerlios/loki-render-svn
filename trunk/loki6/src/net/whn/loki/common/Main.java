@@ -36,6 +36,7 @@ public class Main {
     public static void main(String[] args) {
         LokiForm lokiForm = null;
 
+        
         //if null, no arg was found
         String blenderExe = handleArgs(args);
 
